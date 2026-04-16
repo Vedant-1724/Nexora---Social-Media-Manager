@@ -1,0 +1,15 @@
+# docker-compose.prod.yml
+# Production emulation bundle including all local services, infrastructure dependencies, and the containerized React Frontend.
+
+include:
+  - docker-compose.dev.yml
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: infra/docker/web.Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-gateway

@@ -1,0 +1,76 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:15432/nexora?currentSchema=auth_service}
+    username: ${SPRING_DATASOURCE_USERNAME:nexora}
+    password: ${SPRING_DATASOURCE_PASSWORD:nexora}
+    driver-class-name: org.postgresql.Driver
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:16379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:true}
+    schemas: auth_service
+    default-schema: auth_service
+    locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  health:
+    rabbit:
+      enabled: ${NEXORA_MESSAGING_ENABLED:false}
+    redis:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+
+logging:
+  pattern:
+    level: "%5p [corr:%X{correlationId:-}] [trace:%X{traceId:-}]"
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+nexora:
+  service:
+    name: auth-service
+    display-name: Auth Service
+    description: Identity, sessions, and security workflows
+    phase: phase-4
+    version: 0.1.0
+    environment: ${NEXORA_RUNTIME_ENVIRONMENT:local}
+    docs-path: /api-docs
+  auth:
+    user-service-base-url: ${NEXORA_AUTH_USER_SERVICE_BASE_URL:http://localhost:8082}
+    expose-development-tokens: ${NEXORA_AUTH_EXPOSE_DEVELOPMENT_TOKENS:true}
+    jwt:
+      issuer: ${NEXORA_AUTH_JWT_ISSUER:nexora-auth}
+      secret: ${NEXORA_AUTH_JWT_SECRET:nexora-dev-secret-change-me-please-123456789}
+      access-token-ttl: ${NEXORA_AUTH_ACCESS_TOKEN_TTL:15m}
+      refresh-token-ttl: ${NEXORA_AUTH_REFRESH_TOKEN_TTL:30d}
+    challenge:
+      email-verification-ttl: ${NEXORA_AUTH_EMAIL_VERIFICATION_TTL:2d}
+      password-reset-ttl: ${NEXORA_AUTH_PASSWORD_RESET_TTL:2h}
+  messaging:
+    enabled: ${NEXORA_MESSAGING_ENABLED:false}
+    exchange: nexora.platform.events
+    queue: auth-service.events
+    routing-key: service.auth-service

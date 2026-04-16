@@ -1,0 +1,37 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Production ALB Ingress — exposes web and api-gateway via AWS ALB
+# ═══════════════════════════════════════════════════════════════════════════
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nexora-ingress
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
+spec:
+  rules:
+    - host: app.nexora.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  number: 80
+    - host: api.nexora.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080

@@ -1,0 +1,49 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Nexora K8s Base — Namespace, ConfigMap, Secret & ClusterIssuer
+# ═══════════════════════════════════════════════════════════════════════════
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nexora
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nexora-platform-config
+data:
+  NEXORA_ENV: "local"
+  NEXORA_MESSAGING_ENABLED: "true"
+  NEXORA_RUNTIME_ENVIRONMENT: "k8s"
+  SPRING_RABBITMQ_HOST: "rabbitmq"
+  SPRING_RABBITMQ_PORT: "5672"
+  SPRING_DATA_REDIS_HOST: "redis"
+  SPRING_DATA_REDIS_PORT: "6379"
+  SERVER_PORT: "8080"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nexora-platform-secrets
+type: Opaque
+stringData:
+  SPRING_DATASOURCE_USERNAME: nexora
+  SPRING_DATASOURCE_PASSWORD: nexora
+  SPRING_RABBITMQ_USERNAME: nexora
+  SPRING_RABBITMQ_PASSWORD: nexora
+  NEXORA_AUTH_JWT_SECRET: nexora-dev-secret-change-me-please-123456789
+  NEXORA_AUTH_JWT_ISSUER: nexora-auth
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@nexora.io
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - http01:
+        ingress:
+          class: alb

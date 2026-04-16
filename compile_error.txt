@@ -1,0 +1,155 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] Nexora Platform                                                    [pom]
+[INFO] Nexora Platform Core                                               [jar]
+[INFO] Nexora Platform Web MVC Starter                                    [jar]
+[INFO] Nexora Platform Messaging Starter                                  [jar]
+[INFO] Nexora Post Scheduler Service                                      [jar]
+[INFO] 
+[INFO] ---------------------< com.nexora:nexora-platform >---------------------
+[INFO] Building Nexora Platform 0.1.0                                     [1/5]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ nexora-platform ---
+[INFO] 
+[INFO] ------------------< com.nexora:nexora-platform-core >-------------------
+[INFO] Building Nexora Platform Core 0.1.0                                [2/5]
+[INFO]   from packages\java\nexora-platform-core\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ nexora-platform-core ---
+[INFO] Deleting C:\Users\vedan\Downloads\Study\Nexora - Social Media Manager\packages\java\nexora-platform-core\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ nexora-platform-core ---
+[INFO] skip non existing resourceDirectory C:\Users\vedan\Downloads\Study\Nexora - Social Media Manager\packages\java\nexora-platform-core\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ nexora-platform-core ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 19 source files with javac [debug release 21] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ nexora-platform-core ---
+[INFO] skip non existing resourceDirectory C:\Users\vedan\Downloads\Study\Nexora - Social Media Manager\packages\java\nexora-platform-core\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ nexora-platform-core ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ nexora-platform-core ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ nexora-platform-core ---
+[INFO] Building jar: C:\Users\vedan\Downloads\Study\Nexora - Social Media Manager\packages\java\nexora-platform-core\target\nexora-platform-core-0.1.0.jar
+[INFO] 
+[INFO] -------------< com.nexora:nexora-platform-webmvc-starter >--------------
+[INFO] Building Nexora Platform Web MVC Starter 0.1.0                     [3/5]
+[INFO]   from packages\java\nexora-platform-webmvc-starter\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ nexora-platform-webmvc-starter ---
+[INFO] Deleting C:\Users\vedan\Downloads\Study\Nexora - Social Media Manager\packages\java\nexora-platform-webmvc-starter\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ nexora-platform-webmvc-starter ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ nexora-platform-webmvc-starter ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 7 source files with javac [debug release 21] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ nexora-platform-webmvc-starter ---
+[INFO] skip non existing resourceDirectory C:\Users\vedan\Downloads\Study\Nexora - Social Media Manager\packages\java\nexora-platform-webmvc-starter\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ nexora-platform-webmvc-starter ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ nexora-platform-webmvc-starter ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ nexora-platform-webmvc-starter ---
+[INFO] Building jar: C:\Users\vedan\Downloads\Study\Nexora - Social Media Manager\packages\java\nexora-platform-webmvc-starter\target\nexora-platform-webmvc-starter-0.1.0.jar
+[INFO] 
+[INFO] ------------< com.nexora:nexora-platform-messaging-starter >------------
+[INFO] Building Nexora Platform Messaging Starter 0.1.0                   [4/5]
+[INFO]   from packages\java\nexora-platform-messaging-starter\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ nexora-platform-messaging-starter ---
+[INFO] Deleting C:\Users\vedan\Downloads\Study\Nexora - Social Media Manager\packages\java\nexora-platform-messaging-starter\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ nexora-platform-messaging-starter ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ nexora-platform-messaging-starter ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 21] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ nexora-platform-messaging-starter ---
+[INFO] skip non existing resourceDirectory C:\Users\vedan\Downloads\Study\Nexora - Social Media Manager\packages\java\nexora-platform-messaging-starter\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ nexora-platform-messaging-starter ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ nexora-platform-messaging-starter ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ nexora-platform-messaging-starter ---
+[INFO] Building jar: C:\Users\vedan\Downloads\Study\Nexora - Social Media Manager\packages\java\nexora-platform-messaging-starter\target\nexora-platform-messaging-starter-0.1.0.jar
+[INFO] 
+[INFO] -----------------< com.nexora:post-scheduler-service >------------------
+[INFO] Building Nexora Post Scheduler Service 0.1.0                       [5/5]
+[INFO]   from services\post-scheduler-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ post-scheduler-service ---
+[INFO] Deleting C:\Users\vedan\Downloads\Study\Nexora - Social Media Manager\services\post-scheduler-service\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ post-scheduler-service ---
+[INFO] Copying 3 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ post-scheduler-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 9 source files with javac [debug release 21] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ post-scheduler-service ---
+[INFO] Copying 1 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ post-scheduler-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 21] to target\test-classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/Users/vedan/Downloads/Study/Nexora - Social Media Manager/services/post-scheduler-service/src/test/java/com/nexora/scheduler/PostSchedulerControllerAuthorizationTests.java:[51,37] ';' expected
+[ERROR] /C:/Users/vedan/Downloads/Study/Nexora - Social Media Manager/services/post-scheduler-service/src/test/java/com/nexora/scheduler/PostSchedulerControllerAuthorizationTests.java:[88,37] ';' expected
+[ERROR] /C:/Users/vedan/Downloads/Study/Nexora - Social Media Manager/services/post-scheduler-service/src/test/java/com/nexora/scheduler/PostSchedulerControllerAuthorizationTests.java:[108,37] ';' expected
+[INFO] 3 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for Nexora Platform 0.1.0:
+[INFO] 
+[INFO] Nexora Platform .................................... SUCCESS [  0.368 s]
+[INFO] Nexora Platform Core ............................... SUCCESS [  5.436 s]
+[INFO] Nexora Platform Web MVC Starter .................... SUCCESS [  4.377 s]
+[INFO] Nexora Platform Messaging Starter .................. SUCCESS [  1.789 s]
+[INFO] Nexora Post Scheduler Service ...................... FAILURE [  9.012 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  21.750 s
+[INFO] Finished at: 2026-04-05T00:55:26+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:testCompile (default-testCompile) on project post-scheduler-service: Compilation failure: Compilation failure: 
+[ERROR] /C:/Users/vedan/Downloads/Study/Nexora - Social Media Manager/services/post-scheduler-service/src/test/java/com/nexora/scheduler/PostSchedulerControllerAuthorizationTests.java:[51,37] ';' expected
+[ERROR] /C:/Users/vedan/Downloads/Study/Nexora - Social Media Manager/services/post-scheduler-service/src/test/java/com/nexora/scheduler/PostSchedulerControllerAuthorizationTests.java:[88,37] ';' expected
+[ERROR] /C:/Users/vedan/Downloads/Study/Nexora - Social Media Manager/services/post-scheduler-service/src/test/java/com/nexora/scheduler/PostSchedulerControllerAuthorizationTests.java:[108,37] ';' expected
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :post-scheduler-service

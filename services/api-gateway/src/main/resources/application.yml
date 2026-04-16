@@ -1,0 +1,130 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: api-gateway
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:16379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+  cloud:
+    gateway:
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 20
+            redis-rate-limiter.burstCapacity: 50
+            redis-rate-limiter.requestedTokens: 1
+            key-resolver: "#{@ipKeyResolver}"
+        - SecureHeaders
+      routes:
+        - id: auth-service
+          uri: ${NEXORA_DOWNSTREAM_AUTH_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/v1/auth/**
+        - id: social-integration-service
+          uri: ${NEXORA_DOWNSTREAM_SOCIAL_INTEGRATION_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/v1/social/**,/api/v1/workspaces/*/social/**
+        - id: post-scheduler-service
+          uri: ${NEXORA_DOWNSTREAM_POST_SCHEDULER_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/v1/posts/**,/api/v1/calendar/**,/api/v1/workspaces/*/posts/**,/api/v1/workspaces/*/calendar/**
+        - id: user-service
+          uri: ${NEXORA_DOWNSTREAM_USER_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/v1/workspaces/**,/api/v1/users/**
+        - id: analytics-service
+          uri: ${NEXORA_DOWNSTREAM_ANALYTICS_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/v1/analytics/**
+        - id: notification-service
+          uri: ${NEXORA_DOWNSTREAM_NOTIFICATION_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/api/v1/notifications/**
+        - id: billing-service
+          uri: ${NEXORA_DOWNSTREAM_BILLING_SERVICE_URL:http://localhost:8087}
+          predicates:
+            - Path=/api/v1/billing/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  health:
+    rabbit:
+      enabled: ${NEXORA_MESSAGING_ENABLED:false}
+    redis:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+
+logging:
+  pattern:
+    level: "%5p [corr:%X{correlationId:-}] [trace:%X{traceId:-}]"
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+nexora:
+  service:
+    name: api-gateway
+    display-name: API Gateway
+    description: Nexora gateway for versioned public APIs and cross-cutting controls
+    phase: phase-4
+    version: 0.1.0
+    environment: ${NEXORA_RUNTIME_ENVIRONMENT:local}
+    docs-path: /api-docs
+  messaging:
+    enabled: ${NEXORA_MESSAGING_ENABLED:false}
+    exchange: nexora.platform.events
+    queue: api-gateway.events
+    routing-key: service.api-gateway
+  gateway:
+    probe-timeout: ${NEXORA_GATEWAY_PROBE_TIMEOUT:2s}
+    security:
+      allowed-origins:
+        - ${NEXORA_GATEWAY_ALLOWED_ORIGIN:http://localhost:5173}
+      public-paths:
+        - /actuator
+        - /api-docs
+        - /swagger-ui
+        - /swagger-ui.html
+        - /api/v1/system
+        - /api/v1/auth/signup
+        - /api/v1/auth/login
+        - /api/v1/auth/refresh
+        - /api/v1/auth/verification
+        - /api/v1/auth/password
+        - /api/v1/social/oauth
+        - /api/v1/social/webhooks
+      jwt:
+        issuer: ${NEXORA_AUTH_JWT_ISSUER:nexora-auth}
+        secret: ${NEXORA_AUTH_JWT_SECRET:nexora-dev-secret-change-me-please-123456789}
+    downstream-services:
+      - service: auth-service
+        base-url: ${NEXORA_DOWNSTREAM_AUTH_SERVICE_URL:http://localhost:8081}
+      - service: user-service
+        base-url: ${NEXORA_DOWNSTREAM_USER_SERVICE_URL:http://localhost:8082}
+      - service: social-integration-service
+        base-url: ${NEXORA_DOWNSTREAM_SOCIAL_INTEGRATION_SERVICE_URL:http://localhost:8083}
+      - service: post-scheduler-service
+        base-url: ${NEXORA_DOWNSTREAM_POST_SCHEDULER_SERVICE_URL:http://localhost:8084}
+      - service: analytics-service
+        base-url: ${NEXORA_DOWNSTREAM_ANALYTICS_SERVICE_URL:http://localhost:8085}
+      - service: notification-service
+        base-url: ${NEXORA_DOWNSTREAM_NOTIFICATION_SERVICE_URL:http://localhost:8086}
+      - service: billing-service
+        base-url: ${NEXORA_DOWNSTREAM_BILLING_SERVICE_URL:http://localhost:8087}

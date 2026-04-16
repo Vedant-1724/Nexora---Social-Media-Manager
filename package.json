@@ -1,0 +1,30 @@
+{
+  "name": "nexora-platform",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:packages": "npm run build -w @nexora/contracts && npm run build -w @nexora/ui",
+    "build:web": "npm run build -w @nexora/web",
+    "build": "npm run build:packages && npm run build:web",
+    "dev:web": "npm run build:packages && npm run dev -w @nexora/web",
+    "lint": "npm run lint -ws --if-present",
+    "test:web": "npm run test -w @nexora/web",
+    "test:e2e": "npm run test:e2e -w @nexora/e2e",
+    "test": "npm run test:web && npm run test:e2e",
+    "validate": "npm run build && npm run test && .\\mvnw.cmd -q test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.1",
+    "@types/node": "^22.14.1",
+    "eslint": "^9.25.1",
+    "globals": "^16.0.0",
+    "prettier": "^3.5.3",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.30.1"
+  }
+}

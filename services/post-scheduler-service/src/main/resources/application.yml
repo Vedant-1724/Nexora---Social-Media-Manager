@@ -1,0 +1,70 @@
+server:
+  port: ${SERVER_PORT:8084}
+
+spring:
+  application:
+    name: post-scheduler-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:15432/nexora?currentSchema=scheduler_service}
+    username: ${SPRING_DATASOURCE_USERNAME:nexora}
+    password: ${SPRING_DATASOURCE_PASSWORD:nexora}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:true}
+    schemas: scheduler_service
+    default-schema: scheduler_service
+    locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  health:
+    rabbit:
+      enabled: ${NEXORA_MESSAGING_ENABLED:false}
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+
+logging:
+  pattern:
+    level: "%5p [corr:%X{correlationId:-}] [trace:%X{traceId:-}]"
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+nexora:
+  service:
+    name: post-scheduler-service
+    display-name: Post Scheduler Service
+    description: Drafting, scheduling, approvals, and future publish workers
+    phase: phase-6
+    version: 0.1.0
+    environment: ${NEXORA_RUNTIME_ENVIRONMENT:local}
+    docs-path: /api-docs
+  messaging:
+    enabled: ${NEXORA_MESSAGING_ENABLED:false}
+    exchange: nexora.platform.events
+    queue: post-scheduler-service.events
+    routing-key: service.post-scheduler-service
+  scheduler:
+    social:
+      base-url: ${NEXORA_SCHEDULER_SOCIAL_BASE_URL:http://localhost:8083}
+    dispatch:
+      enabled: ${NEXORA_SCHEDULER_DISPATCH_ENABLED:true}
+      poll-interval-ms: ${NEXORA_SCHEDULER_DISPATCH_POLL_INTERVAL_MS:15000}
+      due-batch-size: ${NEXORA_SCHEDULER_DISPATCH_DUE_BATCH_SIZE:10}
+      max-retries: ${NEXORA_SCHEDULER_DISPATCH_MAX_RETRIES:3}
+      initial-retry-delay-ms: ${NEXORA_SCHEDULER_DISPATCH_INITIAL_RETRY_DELAY_MS:300000}
+      max-retry-delay-ms: ${NEXORA_SCHEDULER_DISPATCH_MAX_RETRY_DELAY_MS:3600000}
+      retry-multiplier: ${NEXORA_SCHEDULER_DISPATCH_RETRY_MULTIPLIER:2.0}
+      worker-id: ${NEXORA_SCHEDULER_DISPATCH_WORKER_ID:post-scheduler-service}

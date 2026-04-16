@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+# Local dev: use Never pull policy so we use locally-built images
+patches:
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+
+# Override the ConfigMap for local Postgres connection
+configMapGenerator:
+  - name: nexora-platform-config
+    behavior: merge
+    literals:
+      - NEXORA_ENV=local
+      - SPRING_DATASOURCE_URL_HOST=localhost
+      - NEXORA_GATEWAY_ALLOWED_ORIGIN=http://localhost:5173
+
+generatorOptions:
+  disableNameSuffixHash: true

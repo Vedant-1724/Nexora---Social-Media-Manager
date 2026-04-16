@@ -1,0 +1,81 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: nexora
+
+resources:
+  - ../../base
+  - ingress.yaml
+
+# Production image tags — override during CI/CD via kustomize edit set image
+images:
+  - name: nexora/api-gateway
+    newName: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/nexora/api-gateway
+    newTag: latest
+  - name: nexora/auth-service
+    newName: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/nexora/auth-service
+    newTag: latest
+  - name: nexora/user-service
+    newName: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/nexora/user-service
+    newTag: latest
+  - name: nexora/social-integration-service
+    newName: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/nexora/social-integration-service
+    newTag: latest
+  - name: nexora/post-scheduler-service
+    newName: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/nexora/post-scheduler-service
+    newTag: latest
+  - name: nexora/analytics-service
+    newName: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/nexora/analytics-service
+    newTag: latest
+  - name: nexora/notification-service
+    newName: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/nexora/notification-service
+    newTag: latest
+  - name: nexora/billing-service
+    newName: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/nexora/billing-service
+    newTag: latest
+  - name: nexora/web
+    newName: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/nexora/web
+    newTag: latest
+
+# Production replica scaling
+patches:
+  - target:
+      kind: Deployment
+      name: api-gateway
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
+      kind: Deployment
+      name: auth-service
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
+      kind: Deployment
+      name: user-service
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
+      kind: Deployment
+      name: web
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+
+# Production ConfigMap overrides
+configMapGenerator:
+  - name: nexora-platform-config
+    behavior: merge
+    literals:
+      - NEXORA_ENV=production
+      - NEXORA_RUNTIME_ENVIRONMENT=eks
+      - NEXORA_GATEWAY_ALLOWED_ORIGIN=https://app.nexora.io
+
+generatorOptions:
+  disableNameSuffixHash: true

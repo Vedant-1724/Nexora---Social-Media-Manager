@@ -1,0 +1,124 @@
+name: Nexora CI
+
+on:
+  push:
+    branches:
+      - main
+      - "codex/**"
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Frontend Lint + Type Check ─────────────────────────────────────────
+  frontend-lint:
+    name: Frontend Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build shared packages
+        run: |
+          npm run build --workspace=packages/contracts
+          npm run build --workspace=packages/ui
+      - name: TypeScript check
+        run: npx tsc --noEmit --project apps/web/tsconfig.json
+
+  # ── Frontend Build + Test ──────────────────────────────────────────────
+  frontend-build:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+    needs: frontend-lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test
+      - name: Upload web build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: apps/web/dist
+          retention-days: 7
+
+  # ── Backend Build + Test ───────────────────────────────────────────────
+  backend-build:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: nexora
+          POSTGRES_USER: nexora
+          POSTGRES_PASSWORD: nexora
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nexora -d nexora"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      rabbitmq:
+        image: rabbitmq:3.13-alpine
+        env:
+          RABBITMQ_DEFAULT_USER: nexora
+          RABBITMQ_DEFAULT_PASS: nexora
+        ports:
+          - 5672:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q status"
+          --health-interval 15s
+          --health-timeout 10s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - name: Build and test all services
+        run: |
+          chmod +x mvnw
+          ./mvnw -q verify
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/nexora
+          SPRING_DATASOURCE_USERNAME: nexora
+          SPRING_DATASOURCE_PASSWORD: nexora
+          SPRING_RABBITMQ_HOST: localhost
+          SPRING_RABBITMQ_PORT: 5672
+          SPRING_RABBITMQ_USERNAME: nexora
+          SPRING_RABBITMQ_PASSWORD: nexora
+
+  # ── Docker Compose Validation ──────────────────────────────────────────
+  compose-validate:
+    name: Docker Compose Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate dev compose
+        run: docker compose -f docker-compose.dev.yml config > /dev/null
+      - name: Validate prod compose
+        run: docker compose -f docker-compose.prod.yml config > /dev/null
+
+  # ── Kustomize Validation ───────────────────────────────────────────────
+  k8s-validate:
+    name: Kubernetes Manifest Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate local overlay
+        run: kubectl kustomize infra/k8s/overlays/local > /dev/null
+      - name: Validate production overlay
+        run: kubectl kustomize infra/k8s/overlays/production > /dev/null

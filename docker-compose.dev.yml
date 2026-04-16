@@ -1,0 +1,269 @@
+x-backend-environment: &backend-environment
+  SERVER_PORT: 8080
+  SPRING_RABBITMQ_HOST: rabbitmq
+  SPRING_RABBITMQ_PORT: 5672
+  SPRING_RABBITMQ_USERNAME: nexora
+  SPRING_RABBITMQ_PASSWORD: nexora
+  SPRING_DATASOURCE_USERNAME: nexora
+  SPRING_DATASOURCE_PASSWORD: nexora
+  SPRING_DATA_REDIS_HOST: redis
+  SPRING_DATA_REDIS_PORT: 6379
+  NEXORA_MESSAGING_ENABLED: "true"
+  NEXORA_RUNTIME_ENVIRONMENT: docker
+  NEXORA_AUTH_JWT_SECRET: nexora-dev-secret-change-me-please-123456789
+  NEXORA_AUTH_JWT_ISSUER: nexora-auth
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: nexora
+      POSTGRES_USER: nexora
+      POSTGRES_PASSWORD: nexora
+    ports:
+      - "15432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexora -d nexora"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "16379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: nexora
+      RABBITMQ_DEFAULT_PASS: nexora
+    ports:
+      - "15673:5672"
+      - "25672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "status"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  minio:
+    image: minio/minio:RELEASE.2025-02-28T09-55-16Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: nexora
+      MINIO_ROOT_PASSWORD: nexora123
+    ports:
+      - "19000:9000"
+      - "19001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:v1.22
+    ports:
+      - "11025:1025"
+      - "18025:8025"
+
+  opensearch:
+    image: opensearchproject/opensearch:2.18.0
+    profiles: ["search"]
+    environment:
+      discovery.type: single-node
+      DISABLE_SECURITY_PLUGIN: "true"
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: "Nexora123!"
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: infra/docker/service.Dockerfile
+      args:
+        SERVICE_DIR: services/auth-service
+        SERVICE_NAME: auth-service
+    environment:
+      <<: *backend-environment
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nexora?currentSchema=auth_service
+      NEXORA_AUTH_USER_SERVICE_BASE_URL: http://user-service:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8081:8080"
+
+  user-service:
+    build:
+      context: .
+      dockerfile: infra/docker/service.Dockerfile
+      args:
+        SERVICE_DIR: services/user-service
+        SERVICE_NAME: user-service
+    environment:
+      <<: *backend-environment
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nexora?currentSchema=user_service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8082:8080"
+
+  social-integration-service:
+    build:
+      context: .
+      dockerfile: infra/docker/service.Dockerfile
+      args:
+        SERVICE_DIR: services/social-integration-service
+        SERVICE_NAME: social-integration-service
+    environment:
+      <<: *backend-environment
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nexora?currentSchema=social_service
+      NEXORA_SOCIAL_CALLBACK_BASE_URL: http://host.docker.internal:18080
+      NEXORA_SOCIAL_ENCRYPTION_ACTIVE_SECRET: nexora-social-dev-encryption-key-1234567890123456
+      NEXORA_SOCIAL_META_CLIENT_ID: 1277286200672843
+      NEXORA_SOCIAL_META_CLIENT_SECRET: 5fc0f5662ce55cab5a5bc542a7b580e4
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8083:8080"
+
+  post-scheduler-service:
+    build:
+      context: .
+      dockerfile: infra/docker/service.Dockerfile
+      args:
+        SERVICE_DIR: services/post-scheduler-service
+        SERVICE_NAME: post-scheduler-service
+    environment:
+      <<: *backend-environment
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nexora?currentSchema=scheduler_service
+      NEXORA_SCHEDULER_SOCIAL_BASE_URL: http://social-integration-service:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8084:8080"
+
+  analytics-service:
+    build:
+      context: .
+      dockerfile: infra/docker/service.Dockerfile
+      args:
+        SERVICE_DIR: services/analytics-service
+        SERVICE_NAME: analytics-service
+    environment:
+      <<: *backend-environment
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8085:8080"
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: infra/docker/service.Dockerfile
+      args:
+        SERVICE_DIR: services/notification-service
+        SERVICE_NAME: notification-service
+    environment:
+      <<: *backend-environment
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8086:8080"
+
+  billing-service:
+    build:
+      context: .
+      dockerfile: infra/docker/service.Dockerfile
+      args:
+        SERVICE_DIR: services/billing-service
+        SERVICE_NAME: billing-service
+    environment:
+      <<: *backend-environment
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8087:8080"
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: infra/docker/service.Dockerfile
+      args:
+        SERVICE_DIR: services/api-gateway
+        SERVICE_NAME: api-gateway
+    environment:
+      <<: *backend-environment
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      NEXORA_DOWNSTREAM_AUTH_SERVICE_URL: http://auth-service:8080
+      NEXORA_DOWNSTREAM_USER_SERVICE_URL: http://user-service:8080
+      NEXORA_DOWNSTREAM_SOCIAL_INTEGRATION_SERVICE_URL: http://social-integration-service:8080
+      NEXORA_DOWNSTREAM_POST_SCHEDULER_SERVICE_URL: http://post-scheduler-service:8080
+      NEXORA_DOWNSTREAM_ANALYTICS_SERVICE_URL: http://analytics-service:8080
+      NEXORA_DOWNSTREAM_NOTIFICATION_SERVICE_URL: http://notification-service:8080
+      NEXORA_DOWNSTREAM_BILLING_SERVICE_URL: http://billing-service:8080
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+      social-integration-service:
+        condition: service_started
+      post-scheduler-service:
+        condition: service_started
+      analytics-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      billing-service:
+        condition: service_started
+    ports:
+      - "18080:8080"
+
+volumes:
+  postgres-data:
+  redis-data:
+  rabbitmq-data:
+  minio-data:
+  opensearch-data:

@@ -1,0 +1,126 @@
+server:
+  port: ${SERVER_PORT:8083}
+
+spring:
+  application:
+    name: social-integration-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:15432/nexora?currentSchema=social_service}
+    username: ${SPRING_DATASOURCE_USERNAME:nexora}
+    password: ${SPRING_DATASOURCE_PASSWORD:nexora}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:true}
+    schemas: social_service
+    default-schema: social_service
+    locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  health:
+    rabbit:
+      enabled: ${NEXORA_MESSAGING_ENABLED:false}
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+
+logging:
+  pattern:
+    level: "%5p [corr:%X{correlationId:-}] [trace:%X{traceId:-}]"
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+nexora:
+  service:
+    name: social-integration-service
+    display-name: Social Integration Service
+    description: Provider OAuth, webhooks, publishing, and inbox connector foundation
+    phase: phase-5
+    version: 0.1.0
+    environment: ${NEXORA_RUNTIME_ENVIRONMENT:local}
+    docs-path: /api-docs
+  messaging:
+    enabled: ${NEXORA_MESSAGING_ENABLED:false}
+    exchange: nexora.platform.events
+    queue: social-integration-service.events
+    routing-key: service.social-integration-service
+  social:
+    oauth:
+      callback-base-url: ${NEXORA_SOCIAL_CALLBACK_BASE_URL:http://localhost:18080}
+      state-ttl: ${NEXORA_SOCIAL_OAUTH_STATE_TTL:15m}
+      token-refresh-skew: ${NEXORA_SOCIAL_TOKEN_REFRESH_SKEW:5m}
+    encryption:
+      active-key-id: ${NEXORA_SOCIAL_ENCRYPTION_ACTIVE_KEY_ID:dev-key}
+      active-secret: ${NEXORA_SOCIAL_ENCRYPTION_ACTIVE_SECRET:nexora-social-dev-encryption-key-1234567890123456}
+    providers:
+      meta:
+        enabled: ${NEXORA_SOCIAL_META_ENABLED:true}
+        client-id: ${NEXORA_SOCIAL_META_CLIENT_ID:meta-client-id}
+        client-secret: ${NEXORA_SOCIAL_META_CLIENT_SECRET:meta-client-secret}
+        authorization-uri: ${NEXORA_SOCIAL_META_AUTHORIZATION_URI:https://www.facebook.com/dialog/oauth}
+        token-uri: ${NEXORA_SOCIAL_META_TOKEN_URI:https://graph.facebook.com/oauth/access_token}
+        profile-uri: ${NEXORA_SOCIAL_META_PROFILE_URI:https://graph.facebook.com/me}
+        publish-uri: ${NEXORA_SOCIAL_META_PUBLISH_URI:https://graph.facebook.com/me/feed}
+        refresh-uri: ${NEXORA_SOCIAL_META_REFRESH_URI:https://graph.facebook.com/oauth/access_token}
+        webhook-verify-token: ${NEXORA_SOCIAL_META_WEBHOOK_VERIFY_TOKEN:nexora-meta-webhook-token}
+        default-scopes:
+          - pages_show_list
+          - pages_manage_posts
+          - pages_read_engagement
+          - pages_manage_metadata
+        capabilities:
+          - publish.text
+          - publish.image
+          - inbox.comments
+          - inbox.messages
+      linkedin:
+        enabled: ${NEXORA_SOCIAL_LINKEDIN_ENABLED:true}
+        client-id: ${NEXORA_SOCIAL_LINKEDIN_CLIENT_ID:linkedin-client-id}
+        client-secret: ${NEXORA_SOCIAL_LINKEDIN_CLIENT_SECRET:linkedin-client-secret}
+        authorization-uri: ${NEXORA_SOCIAL_LINKEDIN_AUTHORIZATION_URI:https://www.linkedin.com/oauth/v2/authorization}
+        token-uri: ${NEXORA_SOCIAL_LINKEDIN_TOKEN_URI:https://www.linkedin.com/oauth/v2/accessToken}
+        profile-uri: ${NEXORA_SOCIAL_LINKEDIN_PROFILE_URI:https://api.linkedin.com/v2/me}
+        publish-uri: ${NEXORA_SOCIAL_LINKEDIN_PUBLISH_URI:https://api.linkedin.com/v2/ugcPosts}
+        refresh-uri: ${NEXORA_SOCIAL_LINKEDIN_REFRESH_URI:https://www.linkedin.com/oauth/v2/accessToken}
+        webhook-verify-token: ${NEXORA_SOCIAL_LINKEDIN_WEBHOOK_VERIFY_TOKEN:nexora-linkedin-webhook-token}
+        default-scopes:
+          - r_liteprofile
+          - r_emailaddress
+          - w_member_social
+        capabilities:
+          - publish.text
+          - publish.image
+          - inbox.comments
+      x:
+        enabled: ${NEXORA_SOCIAL_X_ENABLED:true}
+        client-id: ${NEXORA_SOCIAL_X_CLIENT_ID:x-client-id}
+        client-secret: ${NEXORA_SOCIAL_X_CLIENT_SECRET:x-client-secret}
+        authorization-uri: ${NEXORA_SOCIAL_X_AUTHORIZATION_URI:https://twitter.com/i/oauth2/authorize}
+        token-uri: ${NEXORA_SOCIAL_X_TOKEN_URI:https://api.twitter.com/2/oauth2/token}
+        profile-uri: ${NEXORA_SOCIAL_X_PROFILE_URI:https://api.twitter.com/2/users/me}
+        publish-uri: ${NEXORA_SOCIAL_X_PUBLISH_URI:https://api.twitter.com/2/tweets}
+        refresh-uri: ${NEXORA_SOCIAL_X_REFRESH_URI:https://api.twitter.com/2/oauth2/token}
+        webhook-verify-token: ${NEXORA_SOCIAL_X_WEBHOOK_VERIFY_TOKEN:nexora-x-webhook-token}
+        default-scopes:
+          - tweet.read
+          - tweet.write
+          - users.read
+          - offline.access
+          - dm.read
+        capabilities:
+          - publish.text
+          - publish.image
+          - inbox.mentions
+          - inbox.messages

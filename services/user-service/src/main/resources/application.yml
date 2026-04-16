@@ -1,0 +1,58 @@
+server:
+  port: ${SERVER_PORT:8082}
+
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:15432/nexora?currentSchema=user_service}
+    username: ${SPRING_DATASOURCE_USERNAME:nexora}
+    password: ${SPRING_DATASOURCE_PASSWORD:nexora}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:true}
+    schemas: user_service
+    default-schema: user_service
+    locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  health:
+    rabbit:
+      enabled: ${NEXORA_MESSAGING_ENABLED:false}
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+
+logging:
+  pattern:
+    level: "%5p [corr:%X{correlationId:-}] [trace:%X{traceId:-}]"
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+nexora:
+  service:
+    name: user-service
+    display-name: User Service
+    description: Workspace membership, roles, and user domain management
+    phase: phase-4
+    version: 0.1.0
+    environment: ${NEXORA_RUNTIME_ENVIRONMENT:local}
+    docs-path: /api-docs
+  messaging:
+    enabled: ${NEXORA_MESSAGING_ENABLED:false}
+    exchange: nexora.platform.events
+    queue: user-service.events
+    routing-key: service.user-service

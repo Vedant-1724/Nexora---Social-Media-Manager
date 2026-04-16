@@ -1,0 +1,38 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Java
+.mvn/wrapper/apache-maven-*/
+.mvn/wrapper/*.zip
+**/target/
+.classpath
+.project
+.settings/
+
+# Vite / coverage
+dist/
+coverage/
+*.tsbuildinfo
+playwright-report/
+
+# OS / editor
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Docker / misc
+tmp/
+logs/
