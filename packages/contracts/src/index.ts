@@ -1,6 +1,6 @@
 // ── Social API Contracts ────────────────────────────────────────────────────
 
-export type SocialProvider = "meta" | "linkedin" | "x";
+export type SocialProvider = "meta" | "linkedin" | "x" | "instagram" | "tiktok" | "pinterest" | "youtube" | "threads" | "bluesky";
 
 export type SocialCapability =
   | "publish.text"
@@ -679,7 +679,11 @@ export type NexoraPlatformEvent =
 
 export type AnalyticsOverview = {
   impressions: number;
+  paidImpressions: number;
+  organicImpressions: number;
   reach: number;
+  paidReach: number;
+  organicReach: number;
   engagements: number;
   comments: number;
   clicks: number;
@@ -688,6 +692,7 @@ export type AnalyticsOverview = {
   impressionsChange: number;
   engagementsChange: number;
   reachChange: number;
+  clicksChange: number;
   followerDeltaChange: number;
 };
 
@@ -721,6 +726,74 @@ export type PlatformBreakdown = {
   impressions: number;
   engagements: number;
   percentage: number;
+};
+
+export type AnalyticsUTMConversion = {
+  campaign: string;
+  source: string;
+  medium: string;
+  clicks: number;
+  conversions: number;
+  revenue: number;
+};
+
+export type AnalyticsCompetitor = {
+  competitorId: string;
+  workspaceId: string;
+  name: string;
+  handle: string;
+  provider: string;
+  avatarUrl: string | null;
+  trackedSince: string;
+};
+
+export type AnalyticsCompetitorBenchmark = {
+  competitorId: string;
+  date: string;
+  followers: number;
+  followerGrowth: number;
+  engagements: number;
+  postsPublished: number;
+  shareOfVoicePercentage: number;
+};
+
+export type AnalyticsReportModule = {
+  moduleId: string;
+  type: "overview" | "top_posts" | "platform_breakdown" | "competitors" | "utm_conversions";
+  title: string;
+  position: number;
+  config: Record<string, unknown>;
+};
+
+export type AnalyticsReportTemplate = {
+  templateId: string;
+  workspaceId: string;
+  name: string;
+  description: string | null;
+  agencyLogoUrl: string | null;
+  modules: AnalyticsReportModule[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AnalyticsReportSchedule = {
+  scheduleId: string;
+  templateId: string;
+  frequency: "weekly" | "monthly";
+  recipients: string[];
+  isActive: boolean;
+  lastSentAt: string | null;
+};
+
+export type AnalyticsBIIntegration = {
+  integrationId: string;
+  workspaceId: string;
+  provider: "looker_studio" | "tableau";
+  status: "active" | "inactive" | "pending";
+  connectionKey: string | null;
+  dataPipedCount: number;
+  lastSyncAt: string | null;
+  createdAt: string;
 };
 
 // ── Billing API Contracts ───────────────────────────────────────────────────
@@ -792,3 +865,413 @@ export type NotificationPreferenceUpdateRequest = {
   channel: string;
   enabled: boolean;
 };
+
+// ── Link-in-Bio Contracts ───────────────────────────────────────────────────
+
+export type LinkInBioPage = {
+  pageId: string;
+  workspaceId: string;
+  slug: string;
+  title: string;
+  bioText: string | null;
+  avatarUrl: string | null;
+  themeConfig: Record<string, unknown>;
+  isActive: boolean;
+  entries: LinkInBioEntry[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type LinkInBioEntry = {
+  entryId: string;
+  pageId: string;
+  draftId: string | null;
+  externalUrl: string | null;
+  thumbnailUrl: string | null;
+  label: string;
+  sortOrder: number;
+  isPinned: boolean;
+  createdAt: string;
+};
+
+export type CreateBioPageRequest = {
+  slug: string;
+  title: string;
+  bioText?: string;
+  avatarUrl?: string;
+  themeConfig?: Record<string, unknown>;
+};
+
+export type UpdateBioPageRequest = {
+  title: string;
+  bioText?: string;
+  avatarUrl?: string;
+  themeConfig?: Record<string, unknown>;
+};
+
+export type AddBioEntryRequest = {
+  draftId?: string;
+  externalUrl?: string;
+  thumbnailUrl?: string;
+  label: string;
+  sortOrder: number;
+  isPinned: boolean;
+};
+
+// ── Bulk Import Contracts ───────────────────────────────────────────────────
+
+export type BulkImportResponse = {
+  batchId: string;
+  totalRows: number;
+  validCount: number;
+  invalidCount: number;
+  errors: string[];
+};
+
+// ── Optimal Send Time Contracts ─────────────────────────────────────────────
+
+export type OptimalSendTimeSlot = {
+  provider: string;
+  dayLabel: string;
+  dayOfWeek: number;
+  hourUtc: number;
+  score: number;
+  sampleSize: number;
+};
+
+// ── Calendar Drag Contracts ─────────────────────────────────────────────────
+
+export type CalendarDragUpdateRequest = {
+  scheduledFor: string;
+  timezone: string;
+};
+
+// ── Evergreen Content Contracts ─────────────────────────────────────────────
+
+export type EvergreenCategoryColor =
+  | "sky"
+  | "emerald"
+  | "amber"
+  | "rose"
+  | "violet"
+  | "orange"
+  | "teal"
+  | "pink"
+  | "indigo"
+  | "slate";
+
+export type EvergreenCategory = {
+  categoryId: string;
+  workspaceId: string;
+  name: string;
+  color: EvergreenCategoryColor;
+  icon: string;
+  description: string | null;
+  isEvergreen: boolean;
+  postCount: number;
+  activePostCount: number;
+  lastPublishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type EvergreenPostStatus = "active" | "paused" | "expired";
+
+export type EvergreenPostVariation = {
+  variationId: string;
+  postId: string;
+  caption: string;
+  mediaUrls: string[];
+  usageCount: number;
+  lastUsedAt: string | null;
+  createdAt: string;
+};
+
+export type EvergreenPost = {
+  postId: string;
+  categoryId: string;
+  workspaceId: string;
+  body: string;
+  status: EvergreenPostStatus;
+  isEvergreen: boolean;
+  publishCount: number;
+  lastPublishedAt: string | null;
+  queuePosition: number;
+  variations: EvergreenPostVariation[];
+  targetProviders: SocialProvider[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type EvergreenScheduleSlot = {
+  slotId: string;
+  workspaceId: string;
+  categoryId: string;
+  categoryName: string;
+  categoryColor: EvergreenCategoryColor;
+  dayOfWeek: number;
+  timeUtc: string;
+  timezone: string;
+  isActive: boolean;
+  nextPostTitle: string | null;
+  createdAt: string;
+};
+
+export type CreateEvergreenCategoryRequest = {
+  name: string;
+  color: EvergreenCategoryColor;
+  icon: string;
+  description?: string;
+  isEvergreen?: boolean;
+};
+
+export type UpdateEvergreenCategoryRequest = {
+  name: string;
+  color: EvergreenCategoryColor;
+  icon: string;
+  description?: string;
+  isEvergreen?: boolean;
+};
+
+export type CreateEvergreenPostRequest = {
+  body: string;
+  isEvergreen?: boolean;
+  targetProviders?: SocialProvider[];
+  variations: Array<{
+    caption: string;
+    mediaUrls?: string[];
+  }>;
+};
+
+export type AddEvergreenVariationRequest = {
+  caption: string;
+  mediaUrls?: string[];
+};
+
+export type CreateEvergreenScheduleSlotRequest = {
+  categoryId: string;
+  dayOfWeek: number;
+  timeUtc: string;
+  timezone: string;
+};
+
+export type ReorderEvergreenQueueRequest = {
+  postIds: string[];
+};
+
+// ── Smart Inbox & CRM Contracts ─────────────────────────────────────────────
+
+export type InboxMessageType = "dm" | "comment" | "mention" | "review";
+export type InboxSentiment = "positive" | "neutral" | "negative";
+export type InboxMessageStatus = "unread" | "read" | "replied" | "archived";
+export type InboxReviewSource = "google_my_business" | "apple_app_store" | "yelp";
+
+export type InboxSender = {
+  senderId: string;
+  displayName: string;
+  username: string | null;
+  avatarUrl: string | null;
+  provider: SocialProvider | InboxReviewSource;
+  followerCount: number | null;
+  isVerified: boolean;
+};
+
+export type InboxTag = {
+  tagId: string;
+  workspaceId: string;
+  label: string;
+  color: "sky" | "emerald" | "amber" | "rose" | "violet" | "orange" | "teal" | "pink" | "indigo" | "slate" | "red" | "cyan";
+  createdAt: string;
+};
+
+export type InboxInternalNote = {
+  noteId: string;
+  messageId: string;
+  authorUserId: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+};
+
+export type InboxCollisionLock = {
+  messageId: string;
+  lockedByUserId: string;
+  lockedByName: string;
+  lockedAt: string;
+  expiresAt: string;
+};
+
+export type InboxMessage = {
+  messageId: string;
+  workspaceId: string;
+  conversationId: string;
+  type: InboxMessageType;
+  provider: SocialProvider | InboxReviewSource;
+  sender: InboxSender;
+  subject: string | null;
+  body: string;
+  bodyHtml: string | null;
+  mediaUrls: string[];
+  externalPostUrl: string | null;
+  parentExternalPostId: string | null;
+  status: InboxMessageStatus;
+  sentiment: InboxSentiment;
+  tags: InboxTag[];
+  assignedToUserId: string | null;
+  assignedToName: string | null;
+  collisionLock: InboxCollisionLock | null;
+  internalNotes: InboxInternalNote[];
+  reviewRating: number | null;
+  reviewSource: InboxReviewSource | null;
+  aiSuggestedReply: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type InboxConversation = {
+  conversationId: string;
+  workspaceId: string;
+  sender: InboxSender;
+  latestMessage: InboxMessage;
+  messageCount: number;
+  unreadCount: number;
+  tags: InboxTag[];
+  assignedToUserId: string | null;
+  assignedToName: string | null;
+  sentiment: InboxSentiment;
+  firstMessageAt: string;
+  lastMessageAt: string;
+};
+
+export type InboxReview = {
+  reviewId: string;
+  workspaceId: string;
+  source: InboxReviewSource;
+  reviewerName: string;
+  reviewerAvatarUrl: string | null;
+  rating: number;
+  title: string | null;
+  body: string;
+  response: string | null;
+  respondedAt: string | null;
+  sentiment: InboxSentiment;
+  createdAt: string;
+};
+
+export type InboxModerationRuleAction = "hide" | "flag" | "auto_reply" | "delete";
+export type InboxModerationRuleTrigger = "keyword" | "sentiment" | "spam_score" | "profanity";
+
+export type InboxModerationRule = {
+  ruleId: string;
+  workspaceId: string;
+  name: string;
+  description: string | null;
+  trigger: InboxModerationRuleTrigger;
+  triggerValue: string;
+  action: InboxModerationRuleAction;
+  actionValue: string | null;
+  isActive: boolean;
+  matchCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type InboxBotNodeType = "trigger" | "condition" | "action" | "delay" | "reply";
+
+export type InboxBotNode = {
+  nodeId: string;
+  type: InboxBotNodeType;
+  label: string;
+  config: Record<string, unknown>;
+  position: { x: number; y: number };
+  nextNodeIds: string[];
+};
+
+export type InboxBotFlow = {
+  flowId: string;
+  workspaceId: string;
+  name: string;
+  description: string | null;
+  isActive: boolean;
+  nodes: InboxBotNode[];
+  triggerCount: number;
+  lastTriggeredAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type InboxCrmContact = {
+  contactId: string;
+  senderId: string;
+  displayName: string;
+  email: string | null;
+  provider: SocialProvider | InboxReviewSource;
+  avatarUrl: string | null;
+  totalInteractions: number;
+  sentimentScore: number;
+  lifetimeValue: number | null;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  notes: string | null;
+  customFields: Record<string, string>;
+};
+
+// ── Inbox Request Types ─────────────────────────────────────────────────────
+
+export type ListInboxMessagesRequest = {
+  type?: InboxMessageType;
+  provider?: string;
+  status?: InboxMessageStatus;
+  sentiment?: InboxSentiment;
+  tagId?: string;
+  assignedToUserId?: string;
+  search?: string;
+  cursor?: string;
+  limit?: number;
+};
+
+export type ReplyToInboxMessageRequest = {
+  body: string;
+  mediaUrls?: string[];
+  isInternalNote?: boolean;
+};
+
+export type AcquireCollisionLockRequest = {
+  messageId: string;
+};
+
+export type CreateInboxTagRequest = {
+  label: string;
+  color: InboxTag["color"];
+};
+
+export type AddInternalNoteRequest = {
+  body: string;
+};
+
+export type AssignInboxMessageRequest = {
+  assignedToUserId: string;
+};
+
+export type CreateModerationRuleRequest = {
+  name: string;
+  description?: string;
+  trigger: InboxModerationRuleTrigger;
+  triggerValue: string;
+  action: InboxModerationRuleAction;
+  actionValue?: string;
+};
+
+export type CreateBotFlowRequest = {
+  name: string;
+  description?: string;
+  nodes: InboxBotNode[];
+};
+
+export type UpdateBotFlowRequest = {
+  name?: string;
+  description?: string;
+  isActive?: boolean;
+  nodes?: InboxBotNode[];
+};
+

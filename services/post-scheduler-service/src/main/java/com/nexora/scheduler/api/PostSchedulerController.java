@@ -12,7 +12,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -27,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Validated
 @RestController
@@ -161,6 +167,134 @@ public class PostSchedulerController {
     return postSchedulerService.dispatchScheduledJob(workspaceId, jobId, currentUserId(request));
   }
 
+  // ── Bulk Import ─────────────────────────────────────────────────────────────
+
+  @PostMapping(value = "/workspaces/{workspaceId}/posts/bulk-import", consumes = "multipart/form-data")
+  @RequireScopes("posts.create")
+  public PostSchedulerService.BulkImportResult bulkImport(
+      @PathVariable("workspaceId") UUID workspaceId,
+      @RequestParam("file") MultipartFile file,
+      HttpServletRequest httpServletRequest) {
+    ensureWorkspaceContext(workspaceId, httpServletRequest);
+    List<Map<String, String>> csvRows = parseCsv(file);
+    if (csvRows.isEmpty()) {
+      throw new IllegalArgumentException("CSV file is empty or has no data rows");
+    }
+    if (csvRows.size() > 350) {
+      throw new IllegalArgumentException("CSV file exceeds the 350-post limit per bulk import");
+    }
+    return postSchedulerService.initiateBulkImport(
+        currentUserId(httpServletRequest), workspaceId, csvRows);
+  }
+
+  // ── Link-in-Bio Endpoints ──────────────────────────────────────────────────
+
+  @PostMapping("/workspaces/{workspaceId}/bio-pages")
+  @RequireScopes("posts.create")
+  public PostSchedulerService.BioPageView createBioPage(
+      @PathVariable("workspaceId") UUID workspaceId,
+      @Valid @RequestBody CreateBioPageRequest request,
+      HttpServletRequest httpServletRequest) {
+    ensureWorkspaceContext(workspaceId, httpServletRequest);
+    return postSchedulerService.createBioPage(
+        workspaceId,
+        new PostSchedulerService.CreateBioPageCommand(
+            request.slug(), request.title(), request.bioText(),
+            request.avatarUrl(), request.themeConfig()));
+  }
+
+  @GetMapping("/workspaces/{workspaceId}/bio-pages")
+  @RequireScopes("posts.create")
+  public List<PostSchedulerService.BioPageView> listBioPages(
+      @PathVariable("workspaceId") UUID workspaceId,
+      HttpServletRequest request) {
+    ensureWorkspaceContext(workspaceId, request);
+    return postSchedulerService.listBioPages(workspaceId);
+  }
+
+  @GetMapping("/workspaces/{workspaceId}/bio-pages/{pageId}")
+  @RequireScopes("posts.create")
+  public PostSchedulerService.BioPageView getBioPage(
+      @PathVariable("workspaceId") UUID workspaceId,
+      @PathVariable("pageId") UUID pageId,
+      HttpServletRequest request) {
+    ensureWorkspaceContext(workspaceId, request);
+    return postSchedulerService.getBioPage(workspaceId, pageId);
+  }
+
+  @PutMapping("/workspaces/{workspaceId}/bio-pages/{pageId}")
+  @RequireScopes("posts.create")
+  public PostSchedulerService.BioPageView updateBioPage(
+      @PathVariable("workspaceId") UUID workspaceId,
+      @PathVariable("pageId") UUID pageId,
+      @Valid @RequestBody UpdateBioPageRequest request,
+      HttpServletRequest httpServletRequest) {
+    ensureWorkspaceContext(workspaceId, httpServletRequest);
+    return postSchedulerService.updateBioPage(
+        workspaceId, pageId,
+        new PostSchedulerService.UpdateBioPageCommand(
+            request.title(), request.bioText(), request.avatarUrl(), request.themeConfig()));
+  }
+
+  @PostMapping("/workspaces/{workspaceId}/bio-pages/{pageId}/entries")
+  @RequireScopes("posts.create")
+  public PostSchedulerService.BioEntryView addBioEntry(
+      @PathVariable("workspaceId") UUID workspaceId,
+      @PathVariable("pageId") UUID pageId,
+      @Valid @RequestBody AddBioEntryRequest request,
+      HttpServletRequest httpServletRequest) {
+    ensureWorkspaceContext(workspaceId, httpServletRequest);
+    return postSchedulerService.addBioEntry(
+        workspaceId, pageId,
+        new PostSchedulerService.AddBioEntryCommand(
+            request.draftId(), request.externalUrl(), request.thumbnailUrl(),
+            request.label(), request.sortOrder(), request.isPinned()));
+  }
+
+  @DeleteMapping("/workspaces/{workspaceId}/bio-pages/{pageId}/entries/{entryId}")
+  @RequireScopes("posts.create")
+  public void removeBioEntry(
+      @PathVariable("workspaceId") UUID workspaceId,
+      @PathVariable("pageId") UUID pageId,
+      @PathVariable("entryId") UUID entryId,
+      HttpServletRequest request) {
+    ensureWorkspaceContext(workspaceId, request);
+    postSchedulerService.removeBioEntry(workspaceId, pageId, entryId);
+  }
+
+  // ── CSV Parser ─────────────────────────────────────────────────────────────
+
+  private List<Map<String, String>> parseCsv(MultipartFile file) {
+    List<Map<String, String>> rows = new ArrayList<>();
+    try (BufferedReader reader = new BufferedReader(
+        new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+      String headerLine = reader.readLine();
+      if (headerLine == null || headerLine.isBlank()) {
+        return rows;
+      }
+      String[] headers = headerLine.split(",", -1);
+      for (int i = 0; i < headers.length; i++) {
+        headers[i] = headers[i].trim().replaceAll("^\"|\"$", "");
+      }
+      String line;
+      while ((line = reader.readLine()) != null) {
+        if (line.isBlank()) continue;
+        String[] values = line.split(",", -1);
+        Map<String, String> row = new LinkedHashMap<>();
+        for (int i = 0; i < headers.length; i++) {
+          String value = i < values.length ? values[i].trim().replaceAll("^\"|\"$", "") : "";
+          row.put(headers[i], value);
+        }
+        rows.add(row);
+      }
+    } catch (Exception exception) {
+      throw new IllegalArgumentException("Failed to parse CSV: " + exception.getMessage(), exception);
+    }
+    return rows;
+  }
+
+  // ── Helpers ─────────────────────────────────────────────────────────────────
+
   private PostSchedulerService.SaveDraftCommand toSaveCommand(UUID draftId, SaveDraftRequest request) {
     return new PostSchedulerService.SaveDraftCommand(
         draftId,
@@ -217,6 +351,8 @@ public class PostSchedulerController {
     return (NexoraRequestContext) request.getAttribute(NexoraRequestAttributes.REQUEST_CONTEXT);
   }
 
+  // ── Request Records ────────────────────────────────────────────────────────
+
   public record SaveDraftRequest(
       @NotBlank String title,
       @NotBlank String body,
@@ -255,4 +391,26 @@ public class PostSchedulerController {
       String commentText) {}
 
   public record ScheduleDraftRequest(@NotNull @Future Instant scheduledFor, @NotBlank String timezone) {}
-}
+
+  public record CreateBioPageRequest(
+      @NotBlank String slug,
+      @NotBlank String title,
+      String bioText,
+      String avatarUrl,
+      Map<String, Object> themeConfig) {}
+
+  public record UpdateBioPageRequest(
+      @NotBlank String title,
+      String bioText,
+      String avatarUrl,
+      Map<String, Object> themeConfig) {}
+
+  public record AddBioEntryRequest(
+      UUID draftId,
+      String externalUrl,
+      String thumbnailUrl,
+      @NotBlank String label,
+      int sortOrder,
+      boolean isPinned) {}
+
+

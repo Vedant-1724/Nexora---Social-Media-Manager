@@ -592,15 +592,16 @@ public class PostSchedulerService {
     if (job == null || "cancelled".equals(job.status())) {
       return Map.of();
     }
-    return Map.of(
-        "scheduledFor", job.scheduledFor() == null ? null : job.scheduledFor().toString(),
-        "timezone", job.timezone(),
-        "jobStatus", job.status(),
-        "approvalState", approvalState,
-        "channels", variants.stream().map(this::variantProvider).toList(),
-        "targetAccountIds",
-        variants.stream().flatMap(variant -> variantTargetAccountIds(variant).stream()).distinct().map(UUID::toString).toList(),
-        "assetCount", assets.size());
+    Map<String, Object> summary = new LinkedHashMap<>();
+    summary.put("scheduledFor", job.scheduledFor() == null ? "" : job.scheduledFor().toString());
+    summary.put("timezone", job.timezone());
+    summary.put("jobStatus", job.status());
+    summary.put("approvalState", approvalState);
+    summary.put("channels", variants.stream().map(this::variantProvider).toList());
+    summary.put("targetAccountIds",
+        variants.stream().flatMap(variant -> variantTargetAccountIds(variant).stream()).distinct().map(UUID::toString).toList());
+    summary.put("assetCount", assets.size());
+    return summary;
   }
 
   private String determineLifecycleStatus(ApprovalRequestRecord approvalRequest, ScheduledJobRecord job) {
@@ -943,4 +944,215 @@ public class PostSchedulerService {
       String status,
       Map<String, String> providerPostIds,
       List<String> failures) {}
+
+  // ── Link-in-Bio ─────────────────────────────────────────────────────────────
+
+  @Transactional
+  public BioPageView createBioPage(UUID workspaceId, CreateBioPageCommand command) {
+    UUID pageId = UUID.randomUUID();
+    repository.insertBioPage(
+        pageId,
+        workspaceId,
+        command.slug(),
+        command.title(),
+        command.bioText(),
+        command.avatarUrl(),
+        command.themeConfig() == null ? Map.of() : command.themeConfig());
+    return loadBioPageView(workspaceId, pageId);
+  }
+
+  @Transactional
+  public BioPageView updateBioPage(UUID workspaceId, UUID pageId, UpdateBioPageCommand command) {
+    repository.findBioPage(workspaceId, pageId)
+        .orElseThrow(() -> new IllegalArgumentException("Bio page not found"));
+    repository.updateBioPage(
+        pageId,
+        command.title(),
+        command.bioText(),
+        command.avatarUrl(),
+        command.themeConfig() == null ? Map.of() : command.themeConfig());
+    return loadBioPageView(workspaceId, pageId);
+  }
+
+  @Transactional(readOnly = true)
+  public BioPageView getBioPage(UUID workspaceId, UUID pageId) {
+    return loadBioPageView(workspaceId, pageId);
+  }
+
+  @Transactional(readOnly = true)
+  public List<BioPageView> listBioPages(UUID workspaceId) {
+    return repository.findBioPages(workspaceId).stream()
+        .map(page -> new BioPageView(
+            page.id(), page.workspaceId(), page.slug(), page.title(),
+            page.bioText(), page.avatarUrl(), page.themeConfig(),
+            page.isActive(), repository.findBioEntries(page.id()).stream().map(this::toBioEntryView).toList(),
+            page.createdAt(), page.updatedAt()))
+        .toList();
+  }
+
+  @Transactional
+  public BioEntryView addBioEntry(UUID workspaceId, UUID pageId, AddBioEntryCommand command) {
+    repository.findBioPage(workspaceId, pageId)
+        .orElseThrow(() -> new IllegalArgumentException("Bio page not found"));
+    UUID entryId = UUID.randomUUID();
+    repository.insertBioEntry(
+        entryId, pageId, command.draftId(), command.externalUrl(),
+        command.thumbnailUrl(), command.label(), command.sortOrder(),
+        command.isPinned());
+    return toBioEntryView(repository.findBioEntries(pageId).stream()
+        .filter(entry -> entry.id().equals(entryId)).findFirst().orElseThrow());
+  }
+
+  @Transactional
+  public void removeBioEntry(UUID workspaceId, UUID pageId, UUID entryId) {
+    repository.findBioPage(workspaceId, pageId)
+        .orElseThrow(() -> new IllegalArgumentException("Bio page not found"));
+    repository.deleteBioEntry(entryId);
+  }
+
+  @Transactional(readOnly = true)
+  public PublicBioPageView getPublicBioPage(String slug) {
+    PostSchedulerRepository.BioPageRecord page = repository.findBioPageBySlug(slug)
+        .orElseThrow(() -> new IllegalArgumentException("Bio page not found"));
+    List<BioEntryView> entries = repository.findBioEntries(page.id()).stream()
+        .map(this::toBioEntryView).toList();
+    return new PublicBioPageView(
+        page.slug(), page.title(), page.bioText(), page.avatarUrl(),
+        page.themeConfig(), entries);
+  }
+
+  private BioPageView loadBioPageView(UUID workspaceId, UUID pageId) {
+    PostSchedulerRepository.BioPageRecord page = repository.findBioPage(workspaceId, pageId)
+        .orElseThrow(() -> new IllegalArgumentException("Bio page not found"));
+    List<BioEntryView> entries = repository.findBioEntries(pageId).stream()
+        .map(this::toBioEntryView).toList();
+    return new BioPageView(
+        page.id(), page.workspaceId(), page.slug(), page.title(),
+        page.bioText(), page.avatarUrl(), page.themeConfig(),
+        page.isActive(), entries, page.createdAt(), page.updatedAt());
+  }
+
+  private BioEntryView toBioEntryView(PostSchedulerRepository.BioEntryRecord record) {
+    return new BioEntryView(
+        record.id(), record.pageId(), record.draftId(), record.externalUrl(),
+        record.thumbnailUrl(), record.label(), record.sortOrder(),
+        record.isPinned(), record.createdAt());
+  }
+
+  // ── Bulk Import ─────────────────────────────────────────────────────────────
+
+  @Transactional
+  public BulkImportResult initiateBulkImport(UUID actorUserId, UUID workspaceId, List<Map<String, String>> csvRows) {
+    UUID batchId = UUID.randomUUID();
+    repository.insertImportBatch(
+        batchId, workspaceId, "csv", "processing", actorUserId,
+        "csv-upload-" + Instant.now(clock).toEpochMilli(),
+        Map.of("totalRows", csvRows.size()));
+
+    int validCount = 0;
+    int invalidCount = 0;
+    List<String> errors = new ArrayList<>();
+
+    for (int index = 0; index < csvRows.size(); index++) {
+      Map<String, String> row = csvRows.get(index);
+      UUID itemId = UUID.randomUUID();
+      String title = row.getOrDefault("title", "").trim();
+      String body = row.getOrDefault("body", "").trim();
+      String provider = row.getOrDefault("provider", "").trim().toLowerCase();
+      String scheduledForRaw = row.getOrDefault("scheduledFor", "").trim();
+      String timezone = row.getOrDefault("timezone", "UTC").trim();
+
+      List<String> rowErrors = new ArrayList<>();
+      if (title.isEmpty()) rowErrors.add("title is required");
+      if (body.isEmpty()) rowErrors.add("body is required");
+      if (body.length() > 63206) rowErrors.add("body exceeds 63,206 character limit");
+      if (provider.isEmpty()) rowErrors.add("provider is required");
+
+      String validationStatus = rowErrors.isEmpty() ? "valid" : "invalid";
+      String errorMessage = rowErrors.isEmpty() ? null : String.join("; ", rowErrors);
+
+      repository.insertImportBatchItem(
+          itemId, batchId, index + 1,
+          new java.util.LinkedHashMap<>(row),
+          validationStatus, errorMessage);
+
+      if (rowErrors.isEmpty()) {
+        validCount++;
+        Instant now = Instant.now(clock);
+
+        UUID draftId = UUID.randomUUID();
+        repository.insertDraft(
+            draftId, workspaceId, actorUserId, title, body,
+            "draft", timezone, null, row.getOrDefault("campaignLabel", null),
+            Map.of(), Map.of("importBatchId", batchId.toString()), now);
+
+        repository.upsertVariant(
+            UUID.randomUUID(), draftId, provider,
+            body, row.getOrDefault("linkUrl", null),
+            row.getOrDefault("firstComment", null), Map.of());
+
+        if (!scheduledForRaw.isEmpty()) {
+          try {
+            Instant scheduledFor = Instant.parse(scheduledForRaw);
+            repository.insertScheduledJob(
+                UUID.randomUUID(), draftId, scheduledFor, timezone, "queued", 0, scheduledFor);
+          } catch (Exception exception) {
+            errors.add("Row " + (index + 1) + ": invalid scheduledFor date format");
+          }
+        }
+
+        repository.updateImportBatchItem(itemId, "processed", null, draftId);
+      } else {
+        invalidCount++;
+        errors.addAll(rowErrors.stream().map(err -> "Row " + (index + 1) + ": " + err).toList());
+      }
+    }
+
+    String batchStatus = invalidCount == csvRows.size() ? "failed" : "completed";
+    repository.updateImportBatchStatus(batchId, batchStatus,
+        Map.of("totalRows", csvRows.size(), "validCount", validCount, "invalidCount", invalidCount));
+
+    publishEvent("BulkImportCompleted", Map.of(
+        "workspaceId", workspaceId.toString(),
+        "batchId", batchId.toString(),
+        "totalRows", csvRows.size(),
+        "validCount", validCount,
+        "invalidCount", invalidCount));
+
+    return new BulkImportResult(batchId, csvRows.size(), validCount, invalidCount, errors);
+  }
+
+  // ── Bio Commands & Views ────────────────────────────────────────────────────
+
+  public record CreateBioPageCommand(
+      String slug, String title, String bioText, String avatarUrl,
+      Map<String, Object> themeConfig) {}
+
+  public record UpdateBioPageCommand(
+      String title, String bioText, String avatarUrl,
+      Map<String, Object> themeConfig) {}
+
+  public record AddBioEntryCommand(
+      UUID draftId, String externalUrl, String thumbnailUrl,
+      String label, int sortOrder, boolean isPinned) {}
+
+  public record BioPageView(
+      UUID pageId, UUID workspaceId, String slug, String title,
+      String bioText, String avatarUrl, Map<String, Object> themeConfig,
+      boolean isActive, List<BioEntryView> entries,
+      Instant createdAt, Instant updatedAt) {}
+
+  public record BioEntryView(
+      UUID entryId, UUID pageId, UUID draftId, String externalUrl,
+      String thumbnailUrl, String label, int sortOrder,
+      boolean isPinned, Instant createdAt) {}
+
+  public record PublicBioPageView(
+      String slug, String title, String bioText, String avatarUrl,
+      Map<String, Object> themeConfig, List<BioEntryView> entries) {}
+
+  public record BulkImportResult(
+      UUID batchId, int totalRows, int validCount, int invalidCount,
+      List<String> errors) {}
 }
+

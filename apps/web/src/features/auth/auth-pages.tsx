@@ -109,7 +109,7 @@ function Notice({
 export function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { login, pendingInviteToken } = useAuth();
+  const { login, pendingInviteToken, persistenceEnabled, enablePersistence } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -156,9 +156,20 @@ export function LoginPage() {
         <Field label="Email address" placeholder="you@example.com" onChange={setEmail} value={email} />
         <Field label="Password" placeholder="Enter your password" onChange={setPassword} type="password" value={password} />
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <Link className="text-sm font-semibold text-sky-700" to="/auth/password/request">
-            Forgot your password?
-          </Link>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={persistenceEnabled}
+                onChange={(e) => enablePersistence(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+              />
+              <span className="text-sm text-slate-600">Remember me</span>
+            </label>
+            <Link className="text-sm font-semibold text-sky-700" to="/auth/password/request">
+              Forgot your password?
+            </Link>
+          </div>
           <Button disabled={submitting} type="submit">
             {submitting ? "Signing in..." : "Sign In"}
           </Button>

@@ -73,6 +73,16 @@ public class AnalyticsController {
     return analyticsService.getPlatformBreakdown(workspaceId, from, to);
   }
 
+  @GetMapping("/{workspaceId}/optimal-send-times")
+  @RequireScopes("posts.create")
+  public List<AnalyticsService.OptimalSendTimeSlot> getOptimalSendTimes(
+      @PathVariable("workspaceId") UUID workspaceId,
+      @RequestParam(value = "provider", required = false) String provider,
+      HttpServletRequest request) {
+    ensureWorkspaceContext(workspaceId, request);
+    return analyticsService.getOptimalSendTimes(workspaceId, provider);
+  }
+
   private void ensureWorkspaceContext(UUID workspaceId, HttpServletRequest request) {
     NexoraRequestContext ctx =
         (NexoraRequestContext) request.getAttribute(NexoraRequestAttributes.REQUEST_CONTEXT);

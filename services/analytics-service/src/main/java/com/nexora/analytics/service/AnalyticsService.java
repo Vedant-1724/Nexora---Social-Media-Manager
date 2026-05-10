@@ -136,4 +136,56 @@ public class AnalyticsService {
 
   public record PlatformBreakdownView(
       String provider, long impressions, long engagements, double percentage) {}
+
+  // ── Optimal Send Time ─────────────────────────────────────────────────────
+
+  public List<OptimalSendTimeSlot> getOptimalSendTimes(UUID workspaceId, String providerFilter) {
+    List<AnalyticsRepository.HourlyEngagement> distribution =
+        analyticsRepository.findHourlyEngagementDistribution(workspaceId);
+
+    if (providerFilter != null && !providerFilter.isBlank()) {
+      distribution = distribution.stream()
+          .filter(d -> d.provider().equalsIgnoreCase(providerFilter))
+          .toList();
+    }
+
+    // Group by provider, sort by score descending, take top 3 per provider
+    Map<String, List<AnalyticsRepository.HourlyEngagement>> byProvider = distribution.stream()
+        .collect(java.util.stream.Collectors.groupingBy(AnalyticsRepository.HourlyEngagement::provider));
+
+    List<OptimalSendTimeSlot> results = new java.util.ArrayList<>();
+    for (Map.Entry<String, List<AnalyticsRepository.HourlyEngagement>> entry : byProvider.entrySet()) {
+      entry.getValue().stream()
+          .sorted((a, b) -> Double.compare(b.score(), a.score()))
+          .limit(3)
+          .forEach(d -> results.add(new OptimalSendTimeSlot(
+              entry.getKey(),
+              dayOfWeekLabel(d.dayOfWeek()),
+              d.dayOfWeek(),
+              d.hourUtc(),
+              d.score(),
+              d.sampleSize()
+          )));
+    }
+
+    return results;
+  }
+
+  private String dayOfWeekLabel(int dayOfWeek) {
+    return switch (dayOfWeek) {
+      case 0 -> "Sunday";
+      case 1 -> "Monday";
+      case 2 -> "Tuesday";
+      case 3 -> "Wednesday";
+      case 4 -> "Thursday";
+      case 5 -> "Friday";
+      case 6 -> "Saturday";
+      default -> "Unknown";
+    };
+  }
+
+  public record OptimalSendTimeSlot(
+      String provider, String dayLabel, int dayOfWeek,
+      int hourUtc, double score, int sampleSize) {}
 }
+

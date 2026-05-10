@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, useRef, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ConnectedSocialAccount, SaveDraftRequest, SocialProvider } from "@nexora/contracts";
 import { Badge, Button, Card, CardTitle, cn } from "@nexora/ui";
@@ -10,10 +10,13 @@ import {
   listDrafts,
   saveDraft,
   scheduleDraft,
-  submitDraftForApproval
+  submitDraftForApproval,
+  uploadMedia,
+  bulkImportCSV
 } from "@/lib/api";
+import { MediaUploader } from "./media-uploader";
 
-const providers: SocialProvider[] = ["meta", "linkedin", "x"];
+const providers: SocialProvider[] = ["meta", "linkedin", "x", "instagram", "tiktok", "pinterest", "youtube", "threads", "bluesky"];
 const inputClassName =
   "w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-400";
 
@@ -63,7 +66,13 @@ const emptyForm = (): DraftFormState => ({
   variants: {
     meta: { caption: "", linkUrl: "", firstComment: "", targetAccountIds: [] },
     linkedin: { caption: "", linkUrl: "", firstComment: "", targetAccountIds: [] },
-    x: { caption: "", linkUrl: "", firstComment: "", targetAccountIds: [] }
+    x: { caption: "", linkUrl: "", firstComment: "", targetAccountIds: [] },
+    instagram: { caption: "", linkUrl: "", firstComment: "", targetAccountIds: [] },
+    tiktok: { caption: "", linkUrl: "", firstComment: "", targetAccountIds: [] },
+    pinterest: { caption: "", linkUrl: "", firstComment: "", targetAccountIds: [] },
+    youtube: { caption: "", linkUrl: "", firstComment: "", targetAccountIds: [] },
+    threads: { caption: "", linkUrl: "", firstComment: "", targetAccountIds: [] },
+    bluesky: { caption: "", linkUrl: "", firstComment: "", targetAccountIds: [] }
   }
 });
 
@@ -88,6 +97,7 @@ export function ComposerPage() {
   const [form, setForm] = useState<DraftFormState>(() => emptyForm());
   const [feedback, setFeedback] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"content" | "media" | "platforms" | "advanced">("content");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const draftsQuery = useQuery({
     queryKey: ["scheduler-drafts", workspaceId],
@@ -111,7 +121,13 @@ export function ComposerPage() {
     const grouped: Record<SocialProvider, ConnectedSocialAccount[]> = {
       meta: [],
       linkedin: [],
-      x: []
+      x: [],
+      instagram: [],
+      tiktok: [],
+      pinterest: [],
+      youtube: [],
+      threads: [],
+      bluesky: []
     };
     (accountsQuery.data ?? []).forEach((account) => {
       grouped[account.provider].push(account);
@@ -153,6 +169,15 @@ export function ComposerPage() {
       await queryClient.invalidateQueries({ queryKey: ["scheduler-calendar", workspaceId] });
     },
     onError: (error) => setFeedback(formatError(error))
+  });
+
+  const importMutation = useMutation({
+    mutationFn: (file: File) => bulkImportCSV(workspaceId, accessToken, file),
+    onSuccess: async (res) => {
+      setFeedback(`Imported ${res.validCount} valid rows from ${res.totalRows} total rows. (${res.invalidCount} invalid)`);
+      await queryClient.invalidateQueries({ queryKey: ["scheduler-drafts", workspaceId] });
+    },
+    onError: (error) => setFeedback("Bulk import failed: " + formatError(error))
   });
 
   const selectedDraft = draftQuery.data;
@@ -267,6 +292,26 @@ export function ComposerPage() {
               Workspace-scoped drafts, media metadata, approval routing, and publish-ready variants.
             </p>
           </div>
+          <div>
+            <input 
+              type="file" 
+              accept=".csv" 
+              className="hidden" 
+              ref={fileInputRef} 
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) importMutation.mutate(file);
+                if (fileInputRef.current) fileInputRef.current.value = '';
+              }}
+            />
+            <Button 
+              variant="secondary" 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={importMutation.isPending}
+            >
+              {importMutation.isPending ? "Importing..." : "Bulk Import CSV"}
+            </Button>
+          </div>
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-[220px_1fr]">
@@ -370,78 +415,66 @@ export function ComposerPage() {
 
             {activeTab === "media" && (
               <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Field label="Media Bucket">
-                    <input
-                      className={inputClassName}
-                      onChange={(event) => setForm((current) => ({ ...current, mediaBucket: event.target.value }))}
-                      value={form.mediaBucket}
-                    />
-                  </Field>
-                  <Field label="Media Object Key">
-                    <input
-                      className={inputClassName}
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, mediaObjectKey: event.target.value }))
-                      }
-                      value={form.mediaObjectKey}
-                    />
-                  </Field>
-                </div>
-                <div className="grid gap-4 md:grid-cols-4">
-                  <Field label="MIME">
-                    <input
-                      className={inputClassName}
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, mediaMimeType: event.target.value }))
-                      }
-                      value={form.mediaMimeType}
-                    />
-                  </Field>
-                  <Field label="Kind">
-                    <input
-                      className={inputClassName}
-                      onChange={(event) => setForm((current) => ({ ...current, mediaKind: event.target.value }))}
-                      value={form.mediaKind}
-                    />
-                  </Field>
-                  <Field label="Size">
-                    <input
-                      className={inputClassName}
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, mediaSizeBytes: event.target.value }))
-                      }
-                      value={form.mediaSizeBytes}
-                    />
-                  </Field>
-                  <Field label="Checksum">
-                    <input
-                      className={inputClassName}
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, mediaChecksum: event.target.value }))
-                      }
-                      value={form.mediaChecksum}
-                    />
-                  </Field>
-                </div>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Field label="Alt Text">
-                    <input
-                      className={inputClassName}
-                      onChange={(event) => setForm((current) => ({ ...current, mediaAltText: event.target.value }))}
-                      value={form.mediaAltText}
-                      placeholder="Image Description"
-                    />
-                  </Field>
-                  <Field label="Source URL">
-                    <input
-                      className={inputClassName}
-                      onChange={(event) => setForm((current) => ({ ...current, mediaSourceUrl: event.target.value }))}
-                      value={form.mediaSourceUrl}
-                      placeholder="https://..."
-                    />
-                  </Field>
-                </div>
+                <MediaUploader
+                  uploadMediaCall={(file) => uploadMedia(workspaceId, accessToken, file)}
+                  onUploadSuccess={(data) => {
+                    setFeedback("Media uploaded successfully!");
+                    setForm((current) => ({
+                      ...current,
+                      mediaBucket: data.bucketName,
+                      mediaObjectKey: data.objectKey,
+                      mediaMimeType: data.mimeType,
+                      mediaKind: data.mediaKind,
+                      mediaSizeBytes: String(data.sizeBytes),
+                      mediaChecksum: data.sha256Checksum,
+                      mediaSourceUrl: data.sourceUrl
+                    }));
+                  }}
+                  onUploadError={(error) => setFeedback("Upload failed: " + error)}
+                />
+                
+                {form.mediaObjectKey && (
+                  <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-4 mt-6">
+                    <p className="text-sm font-semibold text-slate-800 mb-4">Attached Asset Metadata</p>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
+                      <div className="text-xs">
+                        <span className="block text-slate-500">Kind</span>
+                        <span className="font-medium text-slate-900">{form.mediaKind}</span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="block text-slate-500">MIME Type</span>
+                        <span className="font-medium text-slate-900">{form.mediaMimeType}</span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="block text-slate-500">Size</span>
+                        <span className="font-medium text-slate-900">{form.mediaSizeBytes} bytes</span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="block text-slate-500">Bucket</span>
+                        <span className="font-medium text-slate-900">{form.mediaBucket}</span>
+                      </div>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                       <Field label="Alt Text">
+                        <input
+                          className={inputClassName}
+                          onChange={(event) => setForm((current) => ({ ...current, mediaAltText: event.target.value }))}
+                          value={form.mediaAltText}
+                          placeholder="Image Description (Optional)"
+                        />
+                      </Field>
+                      <Field label="Source URL">
+                        <input
+                          className={inputClassName}
+                          onChange={(event) => setForm((current) => ({ ...current, mediaSourceUrl: event.target.value }))}
+                          value={form.mediaSourceUrl}
+                          placeholder="https://..."
+                          readOnly
+                        />
+                      </Field>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

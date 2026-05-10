@@ -39,16 +39,22 @@ type AuthContextValue = {
   resetPassword: (token: string, newPassword: string) => Promise<ChallengeCompletionResponse>;
   rememberInviteToken: (token: string | null) => void;
   pendingInviteToken: string | null;
+  enablePersistence: (enabled: boolean) => void;
+  persistenceEnabled: boolean;
 };
 
 const TOKENS_STORAGE_KEY = "nexora.auth.tokens";
 const INVITE_STORAGE_KEY = "nexora.auth.pendingInvite";
+const PERSIST_STORAGE_KEY = "nexora.auth.persist";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [session, setSession] = useState<AuthSessionResponse | null>(null);
+  const [persistenceEnabled, setPersistenceEnabled] = useState<boolean>(() =>
+    readStorage(PERSIST_STORAGE_KEY) === "true"
+  );
   const [pendingInviteToken, setPendingInviteToken] = useState<string | null>(() =>
     readStorage(INVITE_STORAGE_KEY)
   );
@@ -175,9 +181,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         writeStorage(INVITE_STORAGE_KEY, token);
         setPendingInviteToken(token);
       },
-      pendingInviteToken
+      pendingInviteToken,
+      enablePersistence(enabled: boolean) {
+        setPersistenceEnabled(enabled);
+        if (typeof window !== "undefined") {
+          // Always store the preference in localStorage so it survives tab close
+          window.localStorage.setItem(PERSIST_STORAGE_KEY, String(enabled));
+          // Migrate existing tokens to the correct storage
+          const tokens = readTokens();
+          if (tokens) {
+            if (enabled) {
+              window.localStorage.setItem(TOKENS_STORAGE_KEY, JSON.stringify(tokens));
+              window.sessionStorage.removeItem(TOKENS_STORAGE_KEY);
+            } else {
+              window.sessionStorage.setItem(TOKENS_STORAGE_KEY, JSON.stringify(tokens));
+              window.localStorage.removeItem(TOKENS_STORAGE_KEY);
+            }
+          }
+        }
+      },
+      persistenceEnabled
     }),
-    [pendingInviteToken, session, status]
+    [pendingInviteToken, persistenceEnabled, session, status]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -250,11 +275,17 @@ function readTokens(): StoredTokens | null {
   }
 }
 
+function isPersistent() {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(PERSIST_STORAGE_KEY) === "true";
+}
+
 function readStorage(key: string) {
   if (typeof window === "undefined") {
     return null;
   }
-  return window.sessionStorage.getItem(key);
+  // Check localStorage first (persistent session), then sessionStorage
+  return window.localStorage.getItem(key) ?? window.sessionStorage.getItem(key);
 }
 
 function writeStorage(key: string, value: string | null) {
@@ -263,11 +294,18 @@ function writeStorage(key: string, value: string | null) {
   }
 
   if (value == null) {
+    window.localStorage.removeItem(key);
     window.sessionStorage.removeItem(key);
     return;
   }
 
-  window.sessionStorage.setItem(key, value);
+  if (isPersistent()) {
+    window.localStorage.setItem(key, value);
+    window.sessionStorage.removeItem(key);
+  } else {
+    window.sessionStorage.setItem(key, value);
+    window.localStorage.removeItem(key);
+  }
 }
 
 // ── Route Guards ────────────────────────────────────────────────────────────

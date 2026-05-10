@@ -100,7 +100,7 @@ export function DashboardPage() {
       impressions: 1240000, reach: 84200, engagements: 58200,
       comments: 3100, clicks: 18400, followerDelta: 2847,
       engagementRate: 4.7, impressionsChange: 18.3,
-      engagementsChange: 12.1, reachChange: 15.6, followerDeltaChange: 340
+      engagementsChange: 12.1, reachChange: 15.6, clicksChange: 9.8, followerDeltaChange: 340
     },
     retry: 1
   });

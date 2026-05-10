@@ -4,12 +4,14 @@ import {
   Bell,
   Calendar,
   ChevronDown,
+  Inbox,
   LayoutDashboard,
   LogOut,
   PenSquare,
   Search,
   Settings,
-  Users
+  Users,
+  Link2
 } from "lucide-react";
 import { Badge, Card, cn, Button } from "@nexora/ui";
 import { useQuery } from "@tanstack/react-query";
@@ -20,8 +22,10 @@ import { useAuth } from "@/features/auth/auth-context";
 
 const navigationItems = [
   { label: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard },
+  { label: "Inbox", href: "/app/inbox", icon: Inbox },
   { label: "Calendar", href: "/app/calendar", icon: Calendar },
   { label: "Composer", href: "/app/composer", icon: PenSquare },
+  { label: "Bio Pages", href: "/app/bio-pages", icon: Link2 },
   { label: "Analytics", href: "/app/analytics", icon: BarChart3 },
   { label: "Team", href: "/app/team", icon: Users },
   { label: "Settings", href: "/app/settings", icon: Settings }

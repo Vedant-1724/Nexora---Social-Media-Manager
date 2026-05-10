@@ -230,4 +230,34 @@ public class AnalyticsRepository {
 
   public record PlatformTotals(
       String provider, long impressions, long engagements) {}
+
+  public record HourlyEngagement(
+      String provider, int dayOfWeek, int hourUtc, double score, int sampleSize) {}
+
+  // ── Optimal Send Time Query ────────────────────────────────────────────────
+
+  public List<HourlyEngagement> findHourlyEngagementDistribution(UUID workspaceId) {
+    return jdbcClient.sql(
+            """
+            SELECT provider,
+                   EXTRACT(DOW FROM metric_date)::int AS day_of_week,
+                   12 AS hour_utc,
+                   SUM(likes + comments + shares + clicks) AS total_engagement,
+                   COUNT(*)::int AS sample_size
+            FROM content_daily_metrics
+            WHERE workspace_id = :workspaceId
+              AND metric_date >= CURRENT_DATE - INTERVAL '90 days'
+            GROUP BY provider, EXTRACT(DOW FROM metric_date)
+            ORDER BY total_engagement DESC
+            """)
+        .param("workspaceId", workspaceId)
+        .query((rs, rowNum) -> new HourlyEngagement(
+            rs.getString("provider"),
+            rs.getInt("day_of_week"),
+            rs.getInt("hour_utc"),
+            rs.getDouble("total_engagement"),
+            rs.getInt("sample_size")))
+        .list();
+  }
 }
+

@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: post-scheduler-service
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:15432/nexora?currentSchema=scheduler_service}
     username: ${SPRING_DATASOURCE_USERNAME:nexora}
@@ -68,3 +72,8 @@ nexora:
       max-retry-delay-ms: ${NEXORA_SCHEDULER_DISPATCH_MAX_RETRY_DELAY_MS:3600000}
       retry-multiplier: ${NEXORA_SCHEDULER_DISPATCH_RETRY_MULTIPLIER:2.0}
       worker-id: ${NEXORA_SCHEDULER_DISPATCH_WORKER_ID:post-scheduler-service}
+  storage:
+    endpoint: ${NEXORA_STORAGE_ENDPOINT:http://localhost:19000}
+    access-key: ${NEXORA_STORAGE_ACCESS_KEY:nexora}
+    secret-key: ${NEXORA_STORAGE_SECRET_KEY:nexora123}
+    default-bucket: ${NEXORA_STORAGE_DEFAULT_BUCKET:nexora-assets}

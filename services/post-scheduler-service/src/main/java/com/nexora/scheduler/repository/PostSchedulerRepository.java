@@ -1075,4 +1075,248 @@ public class PostSchedulerRepository {
       ApprovalRequestRecord approvalRequest,
       List<ApprovalDecisionRecord> approvalDecisions,
       ScheduledJobRecord scheduledJob) {}
+
+  // ── Import Batch Items ──────────────────────────────────────────────────────
+
+  public void insertImportBatch(
+      UUID id, UUID workspaceId, String sourceType, String status,
+      UUID uploadedByUserId, String sourceReference, Map<String, Object> summary) {
+    jdbcClient.sql(
+            """
+            INSERT INTO import_batches (id, workspace_id, source_type, status, uploaded_by_user_id, source_reference, summary)
+            VALUES (:id, :workspaceId, :sourceType, :status, :uploadedByUserId, :sourceReference, CAST(:summary AS jsonb))
+            """)
+        .param("id", id)
+        .param("workspaceId", workspaceId)
+        .param("sourceType", sourceType)
+        .param("status", status)
+        .param("uploadedByUserId", uploadedByUserId)
+        .param("sourceReference", sourceReference)
+        .param("summary", toJson(summary))
+        .update();
+  }
+
+  public void updateImportBatchStatus(UUID batchId, String status, Map<String, Object> summary) {
+    jdbcClient.sql(
+            """
+            UPDATE import_batches
+            SET status = :status,
+                summary = CAST(:summary AS jsonb),
+                completed_at = CASE WHEN :status IN ('completed', 'failed') THEN NOW() ELSE completed_at END
+            WHERE id = :batchId
+            """)
+        .param("batchId", batchId)
+        .param("status", status)
+        .param("summary", toJson(summary))
+        .update();
+  }
+
+  public void insertImportBatchItem(
+      UUID id, UUID batchId, int rowNumber, Map<String, Object> rawData,
+      String validationStatus, String errorMessage) {
+    jdbcClient.sql(
+            """
+            INSERT INTO import_batch_items (id, batch_id, row_number, raw_data, validation_status, error_message)
+            VALUES (:id, :batchId, :rowNumber, CAST(:rawData AS jsonb), :validationStatus, :errorMessage)
+            """)
+        .param("id", id)
+        .param("batchId", batchId)
+        .param("rowNumber", rowNumber)
+        .param("rawData", toJson(rawData))
+        .param("validationStatus", validationStatus)
+        .param("errorMessage", errorMessage)
+        .update();
+  }
+
+  public void updateImportBatchItem(UUID itemId, String validationStatus, String errorMessage, UUID draftId) {
+    jdbcClient.sql(
+            """
+            UPDATE import_batch_items
+            SET validation_status = :validationStatus,
+                error_message = :errorMessage,
+                draft_id = :draftId,
+                processed_at = NOW()
+            WHERE id = :itemId
+            """)
+        .param("itemId", itemId)
+        .param("validationStatus", validationStatus)
+        .param("errorMessage", errorMessage)
+        .param("draftId", draftId)
+        .update();
+  }
+
+  public List<ImportBatchItemRecord> findImportBatchItems(UUID batchId) {
+    return jdbcClient.sql(
+            """
+            SELECT id, batch_id, row_number, draft_id, raw_data, validation_status, error_message, created_at, processed_at
+            FROM import_batch_items
+            WHERE batch_id = :batchId
+            ORDER BY row_number ASC
+            """)
+        .param("batchId", batchId)
+        .query((rs, rowNum) -> new ImportBatchItemRecord(
+            rs.getObject("id", UUID.class),
+            rs.getObject("batch_id", UUID.class),
+            rs.getInt("row_number"),
+            rs.getObject("draft_id", UUID.class),
+            readStringMap(rs.getString("raw_data")),
+            rs.getString("validation_status"),
+            rs.getString("error_message"),
+            toInstant(rs.getTimestamp("created_at")),
+            toInstant(rs.getTimestamp("processed_at"))))
+        .list();
+  }
+
+  // ── Link-in-Bio Pages ──────────────────────────────────────────────────────
+
+  public void insertBioPage(
+      UUID id, UUID workspaceId, String slug, String title,
+      String bioText, String avatarUrl, Map<String, Object> themeConfig) {
+    jdbcClient.sql(
+            """
+            INSERT INTO link_in_bio_pages (id, workspace_id, slug, title, bio_text, avatar_url, theme_config)
+            VALUES (:id, :workspaceId, :slug, :title, :bioText, :avatarUrl, CAST(:themeConfig AS jsonb))
+            """)
+        .param("id", id)
+        .param("workspaceId", workspaceId)
+        .param("slug", slug)
+        .param("title", title)
+        .param("bioText", bioText)
+        .param("avatarUrl", avatarUrl)
+        .param("themeConfig", toJson(themeConfig))
+        .update();
+  }
+
+  public Optional<BioPageRecord> findBioPage(UUID workspaceId, UUID pageId) {
+    return jdbcClient.sql(
+            """
+            SELECT id, workspace_id, slug, title, bio_text, avatar_url, theme_config, is_active, created_at, updated_at
+            FROM link_in_bio_pages
+            WHERE workspace_id = :workspaceId AND id = :pageId
+            """)
+        .param("workspaceId", workspaceId)
+        .param("pageId", pageId)
+        .query(this::mapBioPage)
+        .optional();
+  }
+
+  public Optional<BioPageRecord> findBioPageBySlug(String slug) {
+    return jdbcClient.sql(
+            """
+            SELECT id, workspace_id, slug, title, bio_text, avatar_url, theme_config, is_active, created_at, updated_at
+            FROM link_in_bio_pages
+            WHERE slug = :slug AND is_active = TRUE
+            """)
+        .param("slug", slug)
+        .query(this::mapBioPage)
+        .optional();
+  }
+
+  public List<BioPageRecord> findBioPages(UUID workspaceId) {
+    return jdbcClient.sql(
+            """
+            SELECT id, workspace_id, slug, title, bio_text, avatar_url, theme_config, is_active, created_at, updated_at
+            FROM link_in_bio_pages
+            WHERE workspace_id = :workspaceId
+            ORDER BY created_at DESC
+            """)
+        .param("workspaceId", workspaceId)
+        .query(this::mapBioPage)
+        .list();
+  }
+
+  public void updateBioPage(UUID pageId, String title, String bioText, String avatarUrl, Map<String, Object> themeConfig) {
+    jdbcClient.sql(
+            """
+            UPDATE link_in_bio_pages
+            SET title = :title, bio_text = :bioText, avatar_url = :avatarUrl,
+                theme_config = CAST(:themeConfig AS jsonb), updated_at = NOW()
+            WHERE id = :pageId
+            """)
+        .param("pageId", pageId)
+        .param("title", title)
+        .param("bioText", bioText)
+        .param("avatarUrl", avatarUrl)
+        .param("themeConfig", toJson(themeConfig))
+        .update();
+  }
+
+  public void insertBioEntry(
+      UUID id, UUID pageId, UUID draftId, String externalUrl,
+      String thumbnailUrl, String label, int sortOrder, boolean isPinned) {
+    jdbcClient.sql(
+            """
+            INSERT INTO link_in_bio_entries (id, page_id, draft_id, external_url, thumbnail_url, label, sort_order, is_pinned)
+            VALUES (:id, :pageId, :draftId, :externalUrl, :thumbnailUrl, :label, :sortOrder, :isPinned)
+            """)
+        .param("id", id)
+        .param("pageId", pageId)
+        .param("draftId", draftId)
+        .param("externalUrl", externalUrl)
+        .param("thumbnailUrl", thumbnailUrl)
+        .param("label", label)
+        .param("sortOrder", sortOrder)
+        .param("isPinned", isPinned)
+        .update();
+  }
+
+  public List<BioEntryRecord> findBioEntries(UUID pageId) {
+    return jdbcClient.sql(
+            """
+            SELECT id, page_id, draft_id, external_url, thumbnail_url, label, sort_order, is_pinned, is_active, created_at
+            FROM link_in_bio_entries
+            WHERE page_id = :pageId AND is_active = TRUE
+            ORDER BY is_pinned DESC, sort_order ASC, created_at ASC
+            """)
+        .param("pageId", pageId)
+        .query((rs, rowNum) -> new BioEntryRecord(
+            rs.getObject("id", UUID.class),
+            rs.getObject("page_id", UUID.class),
+            rs.getObject("draft_id", UUID.class),
+            rs.getString("external_url"),
+            rs.getString("thumbnail_url"),
+            rs.getString("label"),
+            rs.getInt("sort_order"),
+            rs.getBoolean("is_pinned"),
+            rs.getBoolean("is_active"),
+            toInstant(rs.getTimestamp("created_at"))))
+        .list();
+  }
+
+  public void deleteBioEntry(UUID entryId) {
+    jdbcClient.sql("UPDATE link_in_bio_entries SET is_active = FALSE WHERE id = :entryId")
+        .param("entryId", entryId)
+        .update();
+  }
+
+  private BioPageRecord mapBioPage(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException {
+    return new BioPageRecord(
+        rs.getObject("id", UUID.class),
+        rs.getObject("workspace_id", UUID.class),
+        rs.getString("slug"),
+        rs.getString("title"),
+        rs.getString("bio_text"),
+        rs.getString("avatar_url"),
+        readStringMap(rs.getString("theme_config")),
+        rs.getBoolean("is_active"),
+        toInstant(rs.getTimestamp("created_at")),
+        toInstant(rs.getTimestamp("updated_at")));
+  }
+
+  // ── New Records ────────────────────────────────────────────────────────────
+
+  public record ImportBatchItemRecord(
+      UUID id, UUID batchId, int rowNumber, UUID draftId,
+      Map<String, Object> rawData, String validationStatus,
+      String errorMessage, Instant createdAt, Instant processedAt) {}
+
+  public record BioPageRecord(
+      UUID id, UUID workspaceId, String slug, String title,
+      String bioText, String avatarUrl, Map<String, Object> themeConfig,
+      boolean isActive, Instant createdAt, Instant updatedAt) {}
+
+  public record BioEntryRecord(
+      UUID id, UUID pageId, UUID draftId, String externalUrl,
+      String thumbnailUrl, String label, int sortOrder,
+      boolean isPinned, boolean isActive, Instant createdAt) {}
 }

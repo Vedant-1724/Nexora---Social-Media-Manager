@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge, Card, CardTitle, cn } from "@nexora/ui";
-import { ChevronLeft, ChevronRight, Clock, CalendarDays } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, CalendarDays, GripVertical } from "lucide-react";
 
 import { useAuth } from "@/features/auth/auth-context";
-import { listCalendarEntries } from "@/lib/api";
+import { listCalendarEntries, reschedulePost } from "@/lib/api";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -57,6 +57,42 @@ export function CalendarPage() {
     enabled: !!workspaceId && !!accessToken
   });
 
+  const queryClient = useQueryClient();
+
+  const rescheduleMutation = useMutation({
+    mutationFn: ({ draftId, newDate }: { draftId: string; newDate: Date }) => {
+      const scheduledFor = newDate.toISOString();
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      return reschedulePost(workspaceId, draftId, accessToken, scheduledFor, timezone);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["calendar", workspaceId] });
+    }
+  });
+
+  const handleDragStart = (e: React.DragEvent, draftId: string, originalDateStr: string) => {
+    e.dataTransfer.setData("application/json", JSON.stringify({ draftId, originalDateStr }));
+  };
+
+  const handleDrop = (e: React.DragEvent, targetDay: number) => {
+    e.preventDefault();
+    const data = e.dataTransfer.getData("application/json");
+    if (!data) return;
+    try {
+      const { draftId, originalDateStr } = JSON.parse(data);
+      const origDate = new Date(originalDateStr);
+      // Preserve hours and minutes, update the date
+      const newDate = new Date(year, month, targetDay, origDate.getHours(), origDate.getMinutes(), origDate.getSeconds());
+      rescheduleMutation.mutate({ draftId, newDate });
+    } catch (err) {
+      console.error("Failed to parse dropped data");
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
   const entriesByDay = useMemo(() => {
     const map = new Map<number, typeof entries>();
     for (const entry of entries) {
@@ -85,8 +121,10 @@ export function CalendarPage() {
     calendarCells.push(
       <div
         key={day}
+        onDragOver={handleDragOver}
+        onDrop={(e) => handleDrop(e, day)}
         className={cn(
-          "group min-h-[100px] rounded-2xl border p-2 transition-all duration-200 hover:border-sky-200 hover:shadow-sm cursor-pointer",
+          "group min-h-[100px] rounded-2xl border p-2 transition-all duration-200 hover:border-sky-300 hover:shadow-md",
           isToday(day)
             ? "border-sky-300 bg-sky-50/40 shadow-sm"
             : "border-slate-100/80 bg-white/40 hover:bg-white/70"
@@ -111,13 +149,16 @@ export function CalendarPage() {
           {dayEntries.slice(0, 3).map((entry) => (
             <div
               key={entry.scheduledJobId}
+              draggable
+              onDragStart={(e) => handleDragStart(e, entry.draftId, entry.scheduledFor)}
               className={cn(
-                "flex items-center gap-1.5 rounded-lg border px-1.5 py-1 text-[10px] font-medium transition-all hover:shadow-sm",
+                "flex items-center gap-1.5 rounded-lg border px-1.5 py-1 text-[10px] font-medium transition-all hover:shadow-sm cursor-grab active:cursor-grabbing",
                 statusBg[entry.lifecycleStatus] ?? statusBg.draft
               )}
             >
               <div className={cn("h-1.5 w-1.5 shrink-0 rounded-full", statusColors[entry.lifecycleStatus] ?? statusColors.draft)} />
-              <span className="truncate">{entry.title}</span>
+              <span className="truncate flex-1">{entry.title}</span>
+              <GripVertical className="h-3 w-3 opacity-30 group-hover:opacity-100" />
             </div>
           ))}
           {dayEntries.length > 3 && (

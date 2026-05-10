@@ -77,6 +77,41 @@ export function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabId>("profile");
   const [notifications, setNotifications] = useState(notificationSettings);
 
+  // ── Theme Persistence ───────────────────────────────────────────────────
+  type ThemeValue = "light" | "dark" | "system";
+  const THEME_STORAGE_KEY = "nexora.settings.theme";
+
+  const [activeTheme, setActiveTheme] = useState<ThemeValue>(() => {
+    if (typeof window === "undefined") return "light";
+    return (window.localStorage.getItem(THEME_STORAGE_KEY) as ThemeValue) ?? "light";
+  });
+
+  function applyThemeToDocument(theme: ThemeValue) {
+    const root = document.documentElement;
+    if (theme === "system") {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      root.classList.toggle("dark", prefersDark);
+    } else {
+      root.classList.toggle("dark", theme === "dark");
+    }
+  }
+
+  useEffect(() => {
+    applyThemeToDocument(activeTheme);
+    if (activeTheme === "system") {
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      const handler = () => applyThemeToDocument("system");
+      mq.addEventListener("change", handler);
+      return () => mq.removeEventListener("change", handler);
+    }
+  }, [activeTheme]);
+
+  function handleThemeChange(theme: ThemeValue) {
+    setActiveTheme(theme);
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    applyThemeToDocument(theme);
+  }
+
   const { data: subscription } = useQuery({
     queryKey: ["billing-subscription", workspaceId],
     queryFn: () => getWorkspaceSubscription(workspaceId, accessToken),
@@ -435,22 +470,24 @@ export function SettingsPage() {
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-3">Theme</p>
                 <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { label: "Light", icon: Sun, active: true },
-                    { label: "Dark", icon: Moon, active: false },
-                    { label: "System", icon: Globe, active: false }
-                  ].map((theme) => {
+                  {([
+                    { label: "Light", icon: Sun, value: "light" },
+                    { label: "Dark", icon: Moon, value: "dark" },
+                    { label: "System", icon: Globe, value: "system" }
+                  ] as const).map((theme) => {
                     const ThemeIcon = theme.icon;
+                    const isActive = activeTheme === theme.value;
                     return (
                       <button
                         key={theme.label}
                         className={cn(
                           "flex flex-col items-center gap-2 rounded-2xl border p-5 text-sm font-semibold transition-all duration-200",
-                          theme.active
+                          isActive
                             ? "border-sky-300 bg-sky-50/60 text-sky-700 shadow-lg shadow-sky-500/10"
                             : "border-slate-100 text-slate-500 hover:border-slate-200 hover:bg-slate-50/50"
                         )}
                         type="button"
+                        onClick={() => handleThemeChange(theme.value)}
                       >
                         <ThemeIcon className="h-6 w-6" />
                         {theme.label}

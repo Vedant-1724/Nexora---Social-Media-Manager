@@ -5,7 +5,13 @@ import java.util.Arrays;
 public enum SocialProvider {
   META("meta"),
   LINKEDIN("linkedin"),
-  X("x");
+  X("x"),
+  INSTAGRAM("instagram"),
+  TIKTOK("tiktok"),
+  PINTEREST("pinterest"),
+  YOUTUBE("youtube"),
+  THREADS("threads"),
+  BLUESKY("bluesky");
 
   private final String code;
 

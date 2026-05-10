@@ -28,6 +28,8 @@ const ComposerPage = lazy(() => import("@/features/composer/composer-page").then
 const DashboardPage = lazy(() => import("@/features/dashboard/dashboard-page").then(m => ({ default: m.DashboardPage })));
 const SettingsPage = lazy(() => import("@/features/settings/settings-page").then(m => ({ default: m.SettingsPage })));
 const TeamPage = lazy(() => import("@/features/team/team-page").then(m => ({ default: m.TeamPage })));
+const BioPageManager = lazy(() => import("@/features/bio/bio-page-manager").then(m => ({ default: m.BioPageManager })));
+const InboxPage = lazy(() => import("@/features/inbox/inbox-page").then(m => ({ default: m.InboxPage })));
 
 // ── Fallback Loading State ────────────────────────────────────────────────
 function PageLoader() {
@@ -285,11 +287,13 @@ export function App() {
         <Route element={<RequireAuth />} path="/app">
           <Route element={<AppShell />}>
             <Route element={<DashboardPage />} path="dashboard" />
+            <Route element={<InboxPage />} path="inbox" />
             <Route element={<CalendarPage />} path="calendar" />
             <Route element={<ComposerPage />} path="composer" />
             <Route element={<AnalyticsPage />} path="analytics" />
             <Route element={<TeamPage />} path="team" />
             <Route element={<SettingsPage />} path="settings" />
+            <Route element={<BioPageManager />} path="bio-pages" />
           </Route>
         </Route>
       </Routes>
