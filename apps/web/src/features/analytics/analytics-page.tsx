@@ -41,7 +41,7 @@ function AnimatedBar({ value, maxValue, color, delay }: { value: number; maxValu
   const height = Math.max((value / maxValue) * 100, 4);
   return (
     <div className="flex flex-col items-center gap-1.5 flex-1">
-      <div className="relative h-28 w-full rounded-xl bg-slate-100/60 overflow-hidden">
+      <div className="relative h-28 w-full rounded-xl bg-white/5 overflow-hidden border border-white/5">
         <div
           className={cn("absolute bottom-0 w-full rounded-xl transition-all duration-1000 ease-out", color)}
           style={{ height: `${height}%`, transitionDelay: `${delay}ms`, animation: `fadeInUp 0.8s ease-out ${delay}ms forwards`, opacity: 0 }}
@@ -131,20 +131,20 @@ export function AnalyticsPage() {
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-display text-2xl text-slate-950">Analytics & Reporting</h2>
-          <p className="mt-1 text-sm text-slate-500">Advanced insights, competitor tracking, and reporting.</p>
+          <h2 className="font-display text-2xl text-white">Analytics & Reporting</h2>
+          <p className="mt-1 text-sm text-slate-300">Advanced insights, competitor tracking, and reporting.</p>
         </div>
         <div className="flex items-center gap-2">
           {activeTab === "overview" && (
-            <div className="flex rounded-2xl border border-slate-200/60 bg-white/60 p-1 backdrop-blur hidden sm:flex">
+            <div className="flex rounded-2xl border border-white/10 glass-light p-1 backdrop-blur hidden sm:flex">
               {timeRanges.map((r) => (
                 <button
                   key={r.key}
                   className={cn(
                     "rounded-xl px-4 py-2 text-xs font-bold tracking-wider transition-all duration-200",
                     selectedRange === r.key
-                      ? "bg-slate-950 text-white shadow-lg shadow-slate-950/15"
-                      : "text-slate-500 hover:text-slate-700"
+                      ? "bg-white/10 text-white shadow-lg border border-white/10"
+                      : "text-slate-400 hover:text-slate-200"
                   )}
                   onClick={() => setSelectedRange(r.key)}
                   type="button"
@@ -154,7 +154,7 @@ export function AnalyticsPage() {
               ))}
             </div>
           )}
-          <button className="flex items-center gap-1.5 rounded-2xl border border-slate-200/60 bg-white/60 px-4 py-2.5 text-xs font-semibold text-slate-600 backdrop-blur transition-all hover:border-sky-200 hover:shadow-sm">
+          <button className="flex items-center gap-1.5 rounded-2xl border border-white/10 glass-light px-4 py-2.5 text-xs font-semibold text-slate-300 backdrop-blur transition-all hover:border-sky-500/50 hover:shadow-sm hover:text-white">
             <Download className="h-3.5 w-3.5" />
             Export
           </button>
@@ -162,7 +162,7 @@ export function AnalyticsPage() {
       </div>
 
       {/* ── Sub Navigation ─────────────────────────────────────── */}
-      <div className="flex space-x-1 rounded-xl bg-slate-100 p-1">
+      <div className="flex space-x-1 rounded-xl glass-light border border-white/10 p-1">
         {[
           { id: "overview", label: "Overview" },
           { id: "competitors", label: "Competitors" },
@@ -175,8 +175,8 @@ export function AnalyticsPage() {
             className={cn(
               "flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
               activeTab === tab.id
-                ? "bg-white text-slate-900 shadow-sm"
-                : "text-slate-500 hover:bg-white/50 hover:text-slate-700"
+                ? "glass border border-white/20 text-white shadow-sm"
+                : "text-slate-400 hover:bg-white/10 hover:text-white"
             )}
           >
             {tab.label}
@@ -198,31 +198,31 @@ export function AnalyticsPage() {
                 const isUp = typeof change === "number" ? change >= 0 : true;
 
                 return (
-                  <Card key={metric.key} className="group hover-lift glow-border relative overflow-hidden">
+                  <Card key={metric.key} className="group hover-lift relative overflow-hidden glass border-white/10">
                     <div className="flex items-start justify-between">
-                      <div className={cn("flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg transition-transform duration-300 group-hover:scale-110", c.iconBg, c.shadow)}>
+                      <div className={cn("flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg transition-transform duration-300 group-hover:scale-110 border border-white/10", c.iconBg, c.shadow)}>
                         <Icon className="h-5 w-5" />
                       </div>
-                      <div className={cn("flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold", isUp ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
+                      <div className={cn("flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold border border-white/5", isUp ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400")}>
                         {isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                         {Math.abs(change)}%
                       </div>
                     </div>
                     <div className="mt-4">
-                      <h3 className="text-sm font-semibold text-slate-500">{metric.label}</h3>
-                      <p className="mt-1 font-display text-3xl font-bold tracking-tight text-slate-900">
+                      <h3 className="text-sm font-semibold text-slate-400">{metric.label}</h3>
+                      <p className="mt-1 font-display text-3xl font-bold tracking-tight text-white">
                         {formatNumber(value)}
                       </p>
                     </div>
                     {metric.hasSplit && (
-                      <div className="mt-4 flex gap-4 border-t border-slate-100 pt-3">
+                      <div className="mt-4 flex gap-4 border-t border-white/10 pt-3">
                         <div className="flex flex-col">
-                          <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Paid</span>
-                          <span className="text-sm font-semibold text-slate-700">{formatNumber(ov[metric.paidKey as keyof AnalyticsOverview] as number)}</span>
+                          <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Paid</span>
+                          <span className="text-sm font-semibold text-slate-300">{formatNumber(ov[metric.paidKey as keyof AnalyticsOverview] as number)}</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Organic</span>
-                          <span className="text-sm font-semibold text-slate-700">{formatNumber(ov[metric.organicKey as keyof AnalyticsOverview] as number)}</span>
+                          <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Organic</span>
+                          <span className="text-sm font-semibold text-slate-300">{formatNumber(ov[metric.organicKey as keyof AnalyticsOverview] as number)}</span>
                         </div>
                       </div>
                     )}
@@ -233,10 +233,10 @@ export function AnalyticsPage() {
 
             {/* Charts & Tables */}
             <div className="grid gap-6 lg:grid-cols-3">
-              <Card className="lg:col-span-2 !p-6 flex flex-col">
+              <Card className="lg:col-span-2 !p-6 flex flex-col glass border-white/10">
                 <div className="mb-8 flex items-center justify-between">
-                  <CardTitle>Performance Trend</CardTitle>
-                  <div className="flex gap-4 text-xs font-bold text-slate-500">
+                  <CardTitle className="text-white">Performance Trend</CardTitle>
+                  <div className="flex gap-4 text-xs font-bold text-slate-400">
                     <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-sky-400" /> Impressions</span>
                     <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-rose-400" /> Engagements</span>
                   </div>
@@ -254,18 +254,18 @@ export function AnalyticsPage() {
                 </div>
               </Card>
 
-              <Card className="!p-6 flex flex-col">
-                <CardTitle className="mb-6">Platform Breakdown</CardTitle>
+              <Card className="!p-6 flex flex-col glass border-white/10">
+                <CardTitle className="mb-6 text-white">Platform Breakdown</CardTitle>
                 <div className="flex flex-1 flex-col justify-center gap-5">
                   {bd.map((b, i) => (
                     <div key={b.provider} className="group cursor-default" style={{ animation: `fadeInRight 0.6s ease-out ${i * 100}ms forwards`, opacity: 0 }}>
-                      <div className="mb-2 flex justify-between text-sm font-bold text-slate-700">
+                      <div className="mb-2 flex justify-between text-sm font-bold text-slate-300">
                         <span className="capitalize">{b.provider}</span>
                         <span>{b.percentage}%</span>
                       </div>
-                      <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div className="relative h-2 w-full overflow-hidden rounded-full bg-white/10">
                         <div
-                          className={cn("absolute left-0 top-0 h-full rounded-full transition-all duration-1000", platformGradient[b.provider] || "bg-slate-400")}
+                          className={cn("absolute left-0 top-0 h-full rounded-full transition-all duration-1000", platformGradient[b.provider] || "bg-slate-500")}
                           style={{ width: `${b.percentage}%`, transitionDelay: `${i * 150}ms` }}
                         />
                       </div>
@@ -281,34 +281,34 @@ export function AnalyticsPage() {
 
             {/* UTM Conversions & Top Posts */}
             <div className="grid gap-6 lg:grid-cols-2">
-              <Card className="!p-0 overflow-hidden">
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                  <CardTitle>Top Performing Content</CardTitle>
+              <Card className="!p-0 overflow-hidden glass border-white/10">
+                <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                  <CardTitle className="text-white">Top Performing Content</CardTitle>
                   <Button variant="secondary" className="text-xs">View All</Button>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="bg-slate-50/50 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      <tr className="bg-white/5 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
                         <th className="px-6 py-4">Post</th>
                         <th className="px-6 py-4 text-right">Impressions</th>
                         <th className="px-6 py-4 text-right">Eng Rate</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-white/10">
                       {tc.map((p) => (
-                        <tr key={p.providerPostId} className="transition-colors hover:bg-slate-50/50">
+                        <tr key={p.providerPostId} className="transition-colors hover:bg-white/5">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg text-white", platformGradient[p.provider] || "bg-slate-400")}>
+                              <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg text-white", platformGradient[p.provider] || "bg-slate-500")}>
                                 <Share2 className="h-4 w-4" />
                               </div>
-                              <span className="text-sm font-semibold text-slate-700 line-clamp-1">{postTitleMap[p.providerPostId] || "Content Post"}</span>
+                              <span className="text-sm font-semibold text-slate-200 line-clamp-1">{postTitleMap[p.providerPostId] || "Content Post"}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-right text-sm font-semibold text-slate-600">{formatNumber(p.impressions)}</td>
+                          <td className="px-6 py-4 text-right text-sm font-semibold text-slate-300">{formatNumber(p.impressions)}</td>
                           <td className="px-6 py-4 text-right">
-                            <Badge className="bg-sky-50 text-sky-700">{p.engagementRate}%</Badge>
+                            <Badge className="glass-light border-sky-500/30 text-sky-400">{p.engagementRate}%</Badge>
                           </td>
                         </tr>
                       ))}
@@ -317,34 +317,34 @@ export function AnalyticsPage() {
                 </div>
               </Card>
 
-              <Card className="!p-0 overflow-hidden">
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                  <CardTitle>UTM Campaign Conversions</CardTitle>
+              <Card className="!p-0 overflow-hidden glass border-white/10">
+                <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                  <CardTitle className="text-white">UTM Campaign Conversions</CardTitle>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="bg-slate-50/50 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      <tr className="bg-white/5 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
                         <th className="px-6 py-4">Campaign</th>
                         <th className="px-6 py-4 text-right">Clicks</th>
                         <th className="px-6 py-4 text-right">Revenue</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-white/10">
                       {mockUTMConversions.map((utm, i) => (
-                        <tr key={i} className="transition-colors hover:bg-slate-50/50">
+                        <tr key={i} className="transition-colors hover:bg-white/5">
                           <td className="px-6 py-4">
                             <div>
-                              <p className="text-sm font-semibold text-slate-700">{utm.campaign}</p>
+                              <p className="text-sm font-semibold text-slate-200">{utm.campaign}</p>
                               <p className="text-[10px] text-slate-400 uppercase">{utm.source} / {utm.medium}</p>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-right text-sm font-semibold text-slate-600">{formatNumber(utm.clicks)}</td>
+                          <td className="px-6 py-4 text-right text-sm font-semibold text-slate-300">{formatNumber(utm.clicks)}</td>
                           <td className="px-6 py-4 text-right">
                             {utm.revenue > 0 ? (
-                              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">${utm.revenue.toLocaleString()}</Badge>
+                              <Badge className="glass-light border-emerald-500/30 text-emerald-400">${utm.revenue.toLocaleString()}</Badge>
                             ) : (
-                              <span className="text-slate-400 text-sm font-semibold">-</span>
+                              <span className="text-slate-500 text-sm font-semibold">-</span>
                             )}
                           </td>
                         </tr>

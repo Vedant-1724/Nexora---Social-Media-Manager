@@ -54,7 +54,7 @@ function Toggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void 
     <button
       className={cn(
         "relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300",
-        enabled ? "bg-sky-500 shadow-lg shadow-sky-500/30" : "bg-slate-200"
+        enabled ? "bg-sky-500 shadow-lg shadow-sky-500/30" : "bg-white/20"
       )}
       onClick={onToggle}
       type="button"
@@ -194,8 +194,8 @@ export function SettingsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h2 className="font-display text-2xl text-slate-950">Settings</h2>
-        <p className="mt-1 text-sm text-slate-500">Manage your workspace preferences and integrations.</p>
+        <h2 className="font-display text-2xl text-white">Settings</h2>
+        <p className="mt-1 text-sm text-slate-300">Manage your workspace preferences and integrations.</p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
@@ -209,8 +209,8 @@ export function SettingsPage() {
                 className={cn(
                   "group flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-all duration-300",
                   activeTab === tab.id
-                    ? "bg-slate-950 text-white shadow-lg shadow-slate-950/15"
-                    : "text-slate-500 hover:bg-slate-100/80 hover:text-slate-700"
+                    ? "glass border border-white/20 text-white shadow-lg"
+                    : "text-slate-400 hover:bg-white/10 hover:text-white"
                 )}
                 onClick={() => setActiveTab(tab.id)}
                 type="button"
@@ -226,8 +226,8 @@ export function SettingsPage() {
         <div className="animate-fade-in" key={activeTab}>
           {/* Profile */}
           {activeTab === "profile" && (
-            <Card className="hover-lift">
-              <CardTitle className="text-lg mb-6">Profile Settings</CardTitle>
+            <Card className="hover-lift glass border-white/10">
+              <CardTitle className="text-lg mb-6 text-white">Profile Settings</CardTitle>
               <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
                 <div className="flex flex-col items-center gap-3">
                   <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-sky-400 to-sky-600 text-2xl font-bold text-white shadow-xl shadow-sky-500/25 transition-transform hover:scale-105">
@@ -239,31 +239,31 @@ export function SettingsPage() {
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-1.5">Display Name</label>
                     <input
-                      className="w-full rounded-2xl border border-slate-200/60 bg-white/60 px-4 py-3 text-sm backdrop-blur transition-all focus:border-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+                      className="w-full rounded-2xl border border-white/10 glass-light px-4 py-3 text-sm text-white backdrop-blur transition-all focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
                       defaultValue={session?.user?.displayName ?? ""}
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-1.5">Email Address</label>
                     <input
-                      className="w-full rounded-2xl border border-slate-200/60 bg-white/60 px-4 py-3 text-sm backdrop-blur transition-all focus:border-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+                      className="w-full rounded-2xl border border-white/10 glass-light px-4 py-3 text-sm text-white backdrop-blur transition-all focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
                       defaultValue={session?.user?.email ?? ""}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-1.5">Timezone</label>
-                      <select className="w-full rounded-2xl border border-slate-200/60 bg-white/60 px-4 py-3 text-sm backdrop-blur transition-all focus:border-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500/20">
-                        <option>Asia/Kolkata (IST)</option>
-                        <option>America/New_York (EST)</option>
-                        <option>Europe/London (GMT)</option>
+                      <select className="w-full rounded-2xl border border-white/10 glass-light px-4 py-3 text-sm text-white backdrop-blur transition-all focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20">
+                        <option className="bg-slate-900">Asia/Kolkata (IST)</option>
+                        <option className="bg-slate-900">America/New_York (EST)</option>
+                        <option className="bg-slate-900">Europe/London (GMT)</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-1.5">Language</label>
-                      <select className="w-full rounded-2xl border border-slate-200/60 bg-white/60 px-4 py-3 text-sm backdrop-blur transition-all focus:border-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500/20">
-                        <option>English</option>
-                        <option>Hindi</option>
+                      <select className="w-full rounded-2xl border border-white/10 glass-light px-4 py-3 text-sm text-white backdrop-blur transition-all focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20">
+                        <option className="bg-slate-900">English</option>
+                        <option className="bg-slate-900">Hindi</option>
                       </select>
                     </div>
                   </div>
@@ -278,14 +278,14 @@ export function SettingsPage() {
           {/* Connections */}
           {activeTab === "connections" && (
             <div className="space-y-4">
-              <Card className="hover-lift">
-                <CardTitle className="text-lg mb-2">Connected Platforms</CardTitle>
-                <p className="text-sm text-slate-500 mb-6">Manage your social media account connections.</p>
+              <Card className="hover-lift glass border-white/10">
+                <CardTitle className="text-lg mb-2 text-white">Connected Platforms</CardTitle>
+                <p className="text-sm text-slate-300 mb-6">Manage your social media account connections.</p>
                 <div className="space-y-3 stagger">
                   {connectedAccounts.map((account) => (
                     <div
                       key={account.provider}
-                      className="group flex items-center justify-between rounded-2xl border border-slate-100 p-4 transition-all hover:border-sky-200/60 hover:shadow-sm"
+                      className="group flex items-center justify-between rounded-2xl glass-light border border-white/10 p-4 transition-all hover:border-sky-500/30 hover:shadow-sm"
                     >
                       <div className="flex items-center gap-4">
                         <div className={cn(
@@ -295,7 +295,7 @@ export function SettingsPage() {
                           {account.icon}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-800">{account.provider}</p>
+                          <p className="text-sm font-semibold text-white">{account.provider}</p>
                           <p className="mt-0.5 text-xs text-slate-400">
                             {account.status === "connected" ? `Expires ${account.expires}` : "Token expired"}
                           </p>
@@ -303,9 +303,9 @@ export function SettingsPage() {
                       </div>
                       <div className="flex items-center gap-3">
                         {account.status === "connected" ? (
-                          <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700 text-[10px]">Connected</Badge>
+                          <Badge className="border-emerald-500/30 glass-light text-emerald-400 text-[10px]">Connected</Badge>
                         ) : (
-                          <Badge className="border-red-200 bg-red-50 text-red-600 text-[10px]">Expired</Badge>
+                          <Badge className="border-red-500/30 glass-light text-red-400 text-[10px]">Expired</Badge>
                         )}
                         <Button
                           variant={account.status === "expired" ? "primary" : "ghost"}
@@ -318,7 +318,7 @@ export function SettingsPage() {
                   ))}
                 </div>
               </Card>
-              <Card className="hover-lift glass-dark bg-slate-950 text-white border-white/5">
+              <Card className="hover-lift glass-dark text-white border-white/10">
                 <div className="flex items-center gap-3">
                   <Zap className="h-5 w-5 text-amber-400" />
                   <div>
@@ -333,57 +333,57 @@ export function SettingsPage() {
           {/* Billing */}
           {activeTab === "billing" && (
             <div className="space-y-4">
-              <Card className="hover-lift">
-                <CardTitle className="text-lg mb-6">Current Subscription</CardTitle>
+              <Card className="hover-lift glass border-white/10">
+                <CardTitle className="text-lg mb-6 text-white">Current Subscription</CardTitle>
                 {subscription ? (
-                  <div className="rounded-2xl border border-slate-100 p-5 bg-gradient-to-br from-slate-50 to-white">
+                  <div className="rounded-2xl glass-light border border-white/10 p-5">
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="text-xl font-display font-semibold text-slate-900">{subscription.planName}</h3>
-                          <Badge className="bg-sky-100 text-sky-700 capitalize">{subscription.status}</Badge>
+                          <h3 className="text-xl font-display font-semibold text-white">{subscription.planName}</h3>
+                          <Badge className="glass-light border-sky-500/30 text-sky-400 capitalize">{subscription.status}</Badge>
                         </div>
-                        <p className="mt-1 text-sm text-slate-500">Renews on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</p>
+                        <p className="mt-1 text-sm text-slate-400">Renews on {new Date(subscription.currentPeriodEnd).toLocaleDateString()}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-slate-900">{subscription.seatCount} Seats</p>
+                        <p className="text-sm font-semibold text-white">{subscription.seatCount} Seats</p>
                       </div>
                     </div>
-                    <div className="mt-6 pt-5 border-t border-slate-100 flex gap-3">
+                    <div className="mt-6 pt-5 border-t border-white/10 flex gap-3">
                       <Button variant="primary">Manage Subscription</Button>
                       <Button variant="secondary">Change Plan</Button>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-500">Loading subscription details...</p>
+                  <p className="text-sm text-slate-400">Loading subscription details...</p>
                 )}
               </Card>
 
-              <Card className="hover-lift">
-                <CardTitle className="text-lg mb-6">Billing History</CardTitle>
+              <Card className="hover-lift glass border-white/10">
+                <CardTitle className="text-lg mb-6 text-white">Billing History</CardTitle>
                 <div className="space-y-3">
                   {invoices?.length ? invoices.map((inv) => (
-                    <div key={inv.id} className="flex items-center justify-between rounded-2xl border border-slate-100 p-4 transition-all hover:border-sky-200/60 hover:shadow-sm">
+                    <div key={inv.id} className="flex items-center justify-between rounded-2xl glass-light border border-white/10 p-4 transition-all hover:border-sky-500/30 hover:shadow-sm">
                       <div className="flex items-center gap-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl glass-light border border-white/10 text-white">
                           <CreditCard className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-800">${(inv.amountPaidMinor / 100).toFixed(2)} {inv.currency}</p>
+                          <p className="text-sm font-semibold text-white">${(inv.amountPaidMinor / 100).toFixed(2)} {inv.currency}</p>
                           <p className="text-xs text-slate-400">{new Date(inv.issuedAt).toLocaleDateString()} · {inv.invoiceNumber}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Badge className="bg-emerald-50 border-emerald-200 text-emerald-600 capitalize">
+                        <Badge className="glass-light border border-emerald-500/30 text-emerald-400 capitalize">
                           {inv.status}
                         </Badge>
-                        <Button variant="ghost" className="text-xs" onClick={() => inv.hostedInvoiceUrl && window.open(inv.hostedInvoiceUrl, "_blank")}>
+                        <Button variant="ghost" className="text-xs text-slate-300 hover:text-white" onClick={() => inv.hostedInvoiceUrl && window.open(inv.hostedInvoiceUrl, "_blank")}>
                           View
                         </Button>
                       </div>
                     </div>
                   )) : (
-                    <p className="text-sm text-slate-500">No invoices found.</p>
+                    <p className="text-sm text-slate-400">No invoices found.</p>
                   )}
                 </div>
               </Card>
@@ -392,9 +392,9 @@ export function SettingsPage() {
 
           {/* Notifications */}
           {activeTab === "notifications" && (
-            <Card className="hover-lift">
-              <CardTitle className="text-lg mb-2">Notification Preferences</CardTitle>
-              <p className="text-sm text-slate-500 mb-6">Choose how you want to be notified.</p>
+            <Card className="hover-lift glass border-white/10">
+              <CardTitle className="text-lg mb-2 text-white">Notification Preferences</CardTitle>
+              <p className="text-sm text-slate-300 mb-6">Choose how you want to be notified.</p>
               <div className="mb-4 grid grid-cols-[1fr_60px_60px] gap-2 px-4">
                 <span />
                 <span className="text-center text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Email</span>
@@ -404,10 +404,10 @@ export function SettingsPage() {
                 {notifications.map((item, i) => (
                   <div
                     key={item.label}
-                    className="grid grid-cols-[1fr_60px_60px] items-center gap-2 rounded-2xl border border-slate-100 px-4 py-3.5 transition-colors hover:border-sky-200/40 hover:bg-sky-50/20"
+                    className="grid grid-cols-[1fr_60px_60px] items-center gap-2 rounded-2xl border border-white/10 glass-light px-4 py-3.5 transition-colors hover:border-sky-500/30 hover:bg-white/5"
                   >
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">{item.label}</p>
+                      <p className="text-sm font-semibold text-white">{item.label}</p>
                       <p className="mt-0.5 text-xs text-slate-400">{item.description}</p>
                     </div>
                     <div className="flex justify-center">
@@ -425,38 +425,38 @@ export function SettingsPage() {
           {/* Security */}
           {activeTab === "security" && (
             <div className="space-y-4">
-              <Card className="hover-lift">
-                <CardTitle className="text-lg mb-6">Security Settings</CardTitle>
+              <Card className="hover-lift glass border-white/10">
+                <CardTitle className="text-lg mb-6 text-white">Security Settings</CardTitle>
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between rounded-2xl border border-slate-100 p-4">
+                  <div className="flex items-center justify-between rounded-2xl border border-white/10 glass-light p-4">
                     <div className="flex items-center gap-3">
-                      <Key className="h-5 w-5 text-slate-500" />
+                      <Key className="h-5 w-5 text-slate-400" />
                       <div>
-                        <p className="text-sm font-semibold text-slate-800">Password</p>
+                        <p className="text-sm font-semibold text-white">Password</p>
                         <p className="text-xs text-slate-400">Last changed 30 days ago</p>
                       </div>
                     </div>
                     <Button variant="secondary" className="text-xs">Change Password</Button>
                   </div>
-                  <div className="flex items-center justify-between rounded-2xl border border-slate-100 p-4">
+                  <div className="flex items-center justify-between rounded-2xl border border-white/10 glass-light p-4">
                     <div className="flex items-center gap-3">
-                      <Shield className="h-5 w-5 text-slate-500" />
+                      <Shield className="h-5 w-5 text-slate-400" />
                       <div>
-                        <p className="text-sm font-semibold text-slate-800">Two-Factor Authentication</p>
+                        <p className="text-sm font-semibold text-white">Two-Factor Authentication</p>
                         <p className="text-xs text-slate-400">Add an extra layer of security</p>
                       </div>
                     </div>
-                    <Badge className="border-amber-200 bg-amber-50 text-amber-700 text-[10px]">Not Enabled</Badge>
+                    <Badge className="glass-light border border-amber-500/30 text-amber-400 text-[10px]">Not Enabled</Badge>
                   </div>
-                  <div className="flex items-center justify-between rounded-2xl border border-slate-100 p-4">
+                  <div className="flex items-center justify-between rounded-2xl border border-white/10 glass-light p-4">
                     <div className="flex items-center gap-3">
-                      <Monitor className="h-5 w-5 text-slate-500" />
+                      <Monitor className="h-5 w-5 text-slate-400" />
                       <div>
-                        <p className="text-sm font-semibold text-slate-800">Active Sessions</p>
+                        <p className="text-sm font-semibold text-white">Active Sessions</p>
                         <p className="text-xs text-slate-400">1 active session on this device</p>
                       </div>
                     </div>
-                    <Button variant="ghost" className="text-xs text-red-500 hover:text-red-600 hover:bg-red-50">Revoke All</Button>
+                    <Button variant="ghost" className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10">Revoke All</Button>
                   </div>
                 </div>
               </Card>
@@ -465,8 +465,8 @@ export function SettingsPage() {
 
           {/* Appearance */}
           {activeTab === "appearance" && (
-            <Card className="hover-lift">
-              <CardTitle className="text-lg mb-6">Appearance</CardTitle>
+            <Card className="hover-lift glass border-white/10">
+              <CardTitle className="text-lg mb-6 text-white">Appearance</CardTitle>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 mb-3">Theme</p>
                 <div className="grid grid-cols-3 gap-3">
@@ -483,8 +483,8 @@ export function SettingsPage() {
                         className={cn(
                           "flex flex-col items-center gap-2 rounded-2xl border p-5 text-sm font-semibold transition-all duration-200",
                           isActive
-                            ? "border-sky-300 bg-sky-50/60 text-sky-700 shadow-lg shadow-sky-500/10"
-                            : "border-slate-100 text-slate-500 hover:border-slate-200 hover:bg-slate-50/50"
+                            ? "border-sky-500/50 glass text-sky-400 shadow-lg shadow-sky-500/10"
+                            : "border-white/10 glass-light text-slate-400 hover:border-white/20 hover:bg-white/5"
                         )}
                         type="button"
                         onClick={() => handleThemeChange(theme.value)}

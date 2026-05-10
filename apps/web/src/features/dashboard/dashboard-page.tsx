@@ -64,10 +64,10 @@ function SparklineChart({ data, color }: { data: number[]; color: string }) {
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    scheduled: "bg-sky-100 text-sky-700 border-sky-200",
-    approved: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    pending: "bg-amber-100 text-amber-700 border-amber-200",
-    draft: "bg-slate-100 text-slate-600 border-slate-200"
+    scheduled: "glass-light text-sky-400 border-sky-500/30",
+    approved: "glass-light text-emerald-400 border-emerald-500/30",
+    pending: "glass-light text-amber-400 border-amber-500/30",
+    draft: "glass-light text-slate-400 border-white/20"
   };
 
   return (
@@ -154,10 +154,10 @@ export function DashboardPage() {
       {/* ── Welcome ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-display text-2xl text-slate-950">
+          <h2 className="font-display text-2xl text-white">
             Welcome back, {session?.user?.displayName?.split(" ")[0] ?? "there"} 👋
           </h2>
-          <p className="mt-1 text-sm text-slate-500">Here's what's happening across your workspace.</p>
+          <p className="mt-1 text-sm text-slate-300">Here's what's happening across your workspace.</p>
         </div>
         <Badge className="hidden sm:inline-flex">
           <Sparkles className="mr-1.5 h-3 w-3" />
@@ -178,14 +178,14 @@ export function DashboardPage() {
                 <div className={cn(
                   "flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold",
                   stat.trend === "up"
-                    ? "bg-emerald-50 text-emerald-600"
-                    : "bg-red-50 text-red-500"
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                    : "bg-red-500/20 text-red-400 border border-red-500/30"
                 )}>
                   {stat.trend === "up" ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                   {stat.change}
                 </div>
               </div>
-              <p className="mt-4 font-display text-3xl font-semibold text-slate-950 stat-number">{stat.value}</p>
+              <p className="mt-4 font-display text-3xl font-semibold text-white stat-number">{stat.value}</p>
               <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">{stat.label}</p>
               <SparklineChart data={miniSparkline} color={stat.trend === "up" ? "#0ea5e9" : "#ef4444"} />
             </Card>
@@ -198,23 +198,23 @@ export function DashboardPage() {
         {/* ── Upcoming Posts ────────────────────────────────────── */}
         <Card className="hover-lift">
           <div className="flex items-center justify-between mb-5">
-            <CardTitle className="text-lg">Upcoming Posts</CardTitle>
+            <CardTitle className="text-lg text-white">Upcoming Posts</CardTitle>
             <Badge>Today + Tomorrow</Badge>
           </div>
           <div className="space-y-3 stagger">
             {upcomingPosts.map((post) => (
               <div
                 key={post.title}
-                className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-3.5 transition-all hover:border-sky-200 hover:bg-sky-50/30 hover:shadow-sm cursor-pointer"
+                className="group flex items-center justify-between rounded-2xl border border-white/10 glass-light px-4 py-3.5 transition-all hover:border-sky-500/50 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(14,165,233,0.2)] cursor-pointer"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-slate-800 group-hover:text-slate-950">{post.title}</p>
+                  <p className="truncate text-sm font-semibold text-slate-200 group-hover:text-white">{post.title}</p>
                   <div className="mt-1.5 flex items-center gap-2">
                     <span className="text-xs text-slate-400">{post.time}</span>
                     <span className="text-slate-300">·</span>
                     <div className="flex gap-1">
                       {post.platforms.map((p) => (
-                        <span key={p} className="rounded bg-slate-200/70 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">{p}</span>
+                        <span key={p} className="rounded glass-light border border-white/10 px-1.5 py-0.5 text-[10px] font-medium text-slate-300">{p}</span>
                       ))}
                     </div>
                   </div>
@@ -228,7 +228,7 @@ export function DashboardPage() {
         {/* ── Activity Feed ─────────────────────────────────────── */}
         <Card className="hover-lift">
           <div className="flex items-center justify-between mb-5">
-            <CardTitle className="text-lg">Activity</CardTitle>
+            <CardTitle className="text-lg text-white">Activity</CardTitle>
             <div className="flex items-center gap-1.5">
               <div className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(34,197,94,0.5)]" />
               <span className="text-xs font-semibold text-emerald-600">Live</span>
@@ -238,14 +238,14 @@ export function DashboardPage() {
             {activityFeed.map((item) => (
               <div
                 key={`${item.user}-${item.time}`}
-                className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-slate-50/80"
+                className="flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-white/5"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-100 to-sky-200 text-[11px] font-bold text-sky-700">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl glass-light border border-sky-500/30 text-[11px] font-bold text-sky-400">
                   {item.avatar}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm text-slate-700">
-                    <span className="font-semibold text-slate-900">{item.user}</span>{" "}
+                  <p className="text-sm text-slate-300">
+                    <span className="font-semibold text-white">{item.user}</span>{" "}
                     {item.action}
                   </p>
                   <p className="mt-0.5 text-xs text-slate-400">{item.channel} · {item.time}</p>

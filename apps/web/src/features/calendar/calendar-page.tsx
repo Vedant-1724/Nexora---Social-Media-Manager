@@ -20,14 +20,14 @@ const statusColors: Record<string, string> = {
 };
 
 const statusBg: Record<string, string> = {
-  scheduled: "bg-sky-50 border-sky-200 text-sky-700",
-  published: "bg-emerald-50 border-emerald-200 text-emerald-700",
-  publishing: "bg-amber-50 border-amber-200 text-amber-700",
-  failed: "bg-red-50 border-red-200 text-red-700",
-  draft: "bg-slate-50 border-slate-200 text-slate-600",
-  pending_approval: "bg-violet-50 border-violet-200 text-violet-700",
-  approved: "bg-teal-50 border-teal-200 text-teal-700",
-  cancelled: "bg-slate-50 border-slate-200 text-slate-400"
+  scheduled: "glass-light border-sky-500/30 text-sky-400",
+  published: "glass-light border-emerald-500/30 text-emerald-400",
+  publishing: "glass-light border-amber-500/30 text-amber-400",
+  failed: "glass-light border-red-500/30 text-red-400",
+  draft: "glass-light border-white/10 text-slate-400",
+  pending_approval: "glass-light border-violet-500/30 text-violet-400",
+  approved: "glass-light border-teal-500/30 text-teal-400",
+  cancelled: "glass-light border-white/10 text-slate-500"
 };
 
 export function CalendarPage() {
@@ -124,10 +124,10 @@ export function CalendarPage() {
         onDragOver={handleDragOver}
         onDrop={(e) => handleDrop(e, day)}
         className={cn(
-          "group min-h-[100px] rounded-2xl border p-2 transition-all duration-200 hover:border-sky-300 hover:shadow-md",
+          "group min-h-[100px] rounded-2xl border p-2 transition-all duration-200 hover:border-sky-500/50 hover:shadow-md",
           isToday(day)
-            ? "border-sky-300 bg-sky-50/40 shadow-sm"
-            : "border-slate-100/80 bg-white/40 hover:bg-white/70"
+            ? "border-sky-500/50 bg-sky-500/10 shadow-sm"
+            : "border-white/5 glass-light hover:bg-white/10"
         )}
       >
         <div className="flex items-center justify-between mb-1">
@@ -135,8 +135,8 @@ export function CalendarPage() {
             className={cn(
               "flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold",
               isToday(day)
-                ? "bg-sky-500 text-white shadow-lg shadow-sky-500/30"
-                : "text-slate-600 group-hover:bg-slate-100"
+                ? "bg-sky-500/20 text-sky-400 shadow-lg shadow-sky-500/30 border border-sky-500/30"
+                : "text-slate-300 group-hover:bg-white/10"
             )}
           >
             {day}
@@ -152,7 +152,7 @@ export function CalendarPage() {
               draggable
               onDragStart={(e) => handleDragStart(e, entry.draftId, entry.scheduledFor)}
               className={cn(
-                "flex items-center gap-1.5 rounded-lg border px-1.5 py-1 text-[10px] font-medium transition-all hover:shadow-sm cursor-grab active:cursor-grabbing",
+                "flex items-center gap-1.5 rounded-lg border border-white/5 px-1.5 py-1 text-[10px] font-medium transition-all hover:shadow-sm cursor-grab active:cursor-grabbing",
                 statusBg[entry.lifecycleStatus] ?? statusBg.draft
               )}
             >
@@ -176,21 +176,21 @@ export function CalendarPage() {
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-display text-2xl text-slate-950">Content Calendar</h2>
-          <p className="mt-1 text-sm text-slate-500">Schedule and visualize your publishing timeline.</p>
+          <h2 className="font-display text-2xl text-white">Content Calendar</h2>
+          <p className="mt-1 text-sm text-slate-300">Schedule and visualize your publishing timeline.</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 rounded-2xl border border-slate-200/60 bg-white/60 p-1 backdrop-blur">
+          <div className="flex items-center gap-1 rounded-2xl border border-white/10 glass-light p-1 backdrop-blur">
             <button
-              className="rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
               onClick={() => navigate(-1)}
               type="button"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="min-w-[140px] text-center text-sm font-bold text-slate-800">{monthLabel}</span>
+            <span className="min-w-[140px] text-center text-sm font-bold text-white">{monthLabel}</span>
             <button
-              className="rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
               onClick={() => navigate(1)}
               type="button"
             >
@@ -198,7 +198,7 @@ export function CalendarPage() {
             </button>
           </div>
           <button
-            className="rounded-2xl border border-slate-200/60 bg-white/60 px-4 py-2.5 text-xs font-semibold text-slate-600 backdrop-blur transition-all hover:border-sky-200 hover:shadow-sm"
+            className="rounded-2xl border border-white/10 glass-light px-4 py-2.5 text-xs font-semibold text-slate-300 backdrop-blur transition-all hover:border-sky-500/50 hover:shadow-sm hover:text-white"
             onClick={() => setCurrentDate(new Date())}
             type="button"
           >
@@ -218,13 +218,13 @@ export function CalendarPage() {
         ].map((item) => (
           <div key={item.label} className="flex items-center gap-1.5">
             <div className={cn("h-2.5 w-2.5 rounded-full", item.color)} />
-            <span className="text-xs font-semibold text-slate-500">{item.label}</span>
+            <span className="text-xs font-semibold text-slate-300">{item.label}</span>
           </div>
         ))}
       </div>
 
       {/* ── Calendar Grid ───────────────────────────────────────── */}
-      <Card className="!p-4 overflow-hidden">
+      <Card className="!p-4 overflow-hidden glass border-white/10">
         {/* Day Headers */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {DAYS.map((day) => (
@@ -243,22 +243,22 @@ export function CalendarPage() {
       {entries.length > 0 && (
         <Card className="hover-lift">
           <div className="flex items-center gap-2 mb-4">
-            <CalendarDays className="h-4 w-4 text-sky-600" />
-            <CardTitle className="text-lg">Upcoming This Month</CardTitle>
-            <Badge>{entries.length} posts</Badge>
+            <CalendarDays className="h-4 w-4 text-sky-400" />
+            <CardTitle className="text-lg text-white">Upcoming This Month</CardTitle>
+            <Badge className="glass-light text-white border-white/20">{entries.length} posts</Badge>
           </div>
           <div className="space-y-2 stagger">
             {entries.slice(0, 5).map((entry) => (
               <div
                 key={entry.scheduledJobId}
-                className="flex items-center justify-between rounded-2xl border border-slate-100 px-4 py-3 transition-all hover:border-sky-200/60 hover:bg-sky-50/20 hover:shadow-sm cursor-pointer"
+                className="flex items-center justify-between rounded-2xl border border-white/10 glass-light px-4 py-3 transition-all hover:border-sky-500/50 hover:bg-white/10 hover:shadow-sm cursor-pointer"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className={cn("h-2.5 w-2.5 shrink-0 rounded-full", statusColors[entry.lifecycleStatus] ?? statusColors.draft)} />
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-800">{entry.title}</p>
+                    <p className="truncate text-sm font-semibold text-slate-200">{entry.title}</p>
                     <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400">
-                      <Clock className="h-3 w-3" />
+                       <Clock className="h-3 w-3" />
                       {new Date(entry.scheduledFor).toLocaleDateString("en-IN", {
                         month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
                       })}
@@ -267,7 +267,7 @@ export function CalendarPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   {entry.channels.map((ch) => (
-                    <span key={ch} className="rounded-lg bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">{ch}</span>
+                    <span key={ch} className="rounded-lg glass-light border border-white/10 px-2 py-0.5 text-[10px] font-semibold text-slate-300">{ch}</span>
                   ))}
                 </div>
               </div>

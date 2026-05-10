@@ -56,9 +56,9 @@ function LandingPage() {
           <Badge className="animate-fade-in-down">Scalable social operations</Badge>
           <h1 className="mt-6 max-w-[600px] font-display text-[3.2rem] leading-[1.1] tracking-tight lg:text-[4.2rem]">
             <span className="text-gradient">Command center</span>{" "}
-            <span className="text-slate-950">for modern social teams.</span>
+            <span className="text-white">for modern social teams.</span>
           </h1>
-          <p className="mt-6 max-w-lg text-lg leading-8 text-slate-500">
+          <p className="mt-6 max-w-lg text-lg leading-8 text-slate-300">
             Nexora brings scheduling, approvals, analytics, inbox workflows, and AI modules
             into a refined operating system for brands and agencies.
           </p>
@@ -76,7 +76,7 @@ function LandingPage() {
           <div className="mt-12 flex flex-wrap gap-8">
             {socialProofStats.slice(0, 3).map((stat) => (
               <div key={stat.label} className="animate-fade-in-up">
-                <p className="font-display text-3xl font-semibold text-slate-950">{stat.value}</p>
+                <p className="font-display text-3xl font-semibold text-white">{stat.value}</p>
                 <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">{stat.label}</p>
               </div>
             ))}
@@ -84,7 +84,7 @@ function LandingPage() {
         </div>
 
         {/* ── Platform Preview Card ──────────────────────────────── */}
-        <Card className="glass-dark bg-slate-950 text-white hover-lift border-white/5 animate-slide-in-right">
+        <Card className="glass-dark text-white hover-lift border-white/5 animate-slide-in-right">
           <CardTitle className="text-white">Platform Preview</CardTitle>
           <CardDescription className="mt-2 text-slate-400">
             Cloud-native architecture supporting 6+ social networks.
@@ -110,10 +110,10 @@ function LandingPage() {
       <section className="py-20">
         <div className="text-center">
           <Badge>Features</Badge>
-          <h2 className="mt-6 font-display text-4xl text-slate-950 lg:text-5xl">
+          <h2 className="mt-6 font-display text-4xl text-white lg:text-5xl">
             Everything your team needs
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-slate-500">
+          <p className="mx-auto mt-4 max-w-xl text-lg text-slate-300">
             From content creation to performance reporting — one platform to manage it all.
           </p>
         </div>
@@ -132,7 +132,7 @@ function LandingPage() {
 
       {/* ── Social Proof ───────────────────────────────────────────── */}
       <section className="py-16">
-        <Card className="glass-dark bg-slate-950 text-white border-white/5">
+        <Card className="glass-dark text-white border-white/5">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {socialProofStats.map((stat) => (
               <div key={stat.label} className="text-center">
@@ -147,8 +147,8 @@ function LandingPage() {
 
       {/* ── CTA ────────────────────────────────────────────────────── */}
       <section className="py-16 text-center">
-        <h2 className="font-display text-4xl text-slate-950">Ready to elevate your workflow?</h2>
-        <p className="mx-auto mt-4 max-w-md text-lg text-slate-500">
+        <h2 className="font-display text-4xl text-white">Ready to elevate your workflow?</h2>
+        <p className="mx-auto mt-4 max-w-md text-lg text-slate-300">
           Join thousands of teams who trust Nexora for their social media operations.
         </p>
         <div className="mt-8 flex justify-center gap-3">
@@ -192,8 +192,8 @@ function PricingPage() {
     <div className="py-8 animate-fade-in">
       <div className="text-center">
         <Badge>Pricing</Badge>
-        <h1 className="mt-6 font-display text-5xl text-slate-950">Plans that scale with your team</h1>
-        <p className="mx-auto mt-4 max-w-xl text-lg text-slate-500">
+        <h1 className="mt-6 font-display text-5xl text-white">Plans that scale with your team</h1>
+        <p className="mx-auto mt-4 max-w-xl text-lg text-slate-300">
           Start free, upgrade when you need more power. All plans include 14-day trials.
         </p>
       </div>
@@ -204,8 +204,8 @@ function PricingPage() {
             key={plan.name}
             className={`relative hover-lift glow-border ${
               plan.popular
-                ? "glass-dark bg-slate-950 text-white border-sky-500/20 shadow-glow-lg scale-[1.03]"
-                : "bg-white/90"
+                ? "glass-dark border-sky-500/30 shadow-glow-lg scale-[1.03]"
+                : "glass border-white/10"
             }`}
           >
             {plan.popular && (
@@ -220,14 +220,14 @@ function PricingPage() {
                 {plan.name}
               </p>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className={`font-display text-5xl font-semibold ${plan.popular ? "text-white" : "text-slate-950"}`}>
+                <span className={`font-display text-5xl font-semibold text-white`}>
                   {plan.price}
                 </span>
-                <span className={`text-sm ${plan.popular ? "text-slate-400" : "text-slate-500"}`}>
+                <span className={`text-sm ${plan.popular ? "text-slate-400" : "text-slate-400"}`}>
                   {plan.period}
                 </span>
               </div>
-              <p className={`mt-3 text-sm leading-6 ${plan.popular ? "text-slate-300" : "text-slate-500"}`}>
+              <p className={`mt-3 text-sm leading-6 ${plan.popular ? "text-slate-300" : "text-slate-300"}`}>
                 {plan.description}
               </p>
             </div>
@@ -236,13 +236,13 @@ function PricingPage() {
               {plan.features.map((feature) => (
                 <div key={feature} className="flex items-center gap-2.5">
                   <div className={`flex h-5 w-5 items-center justify-center rounded-lg ${
-                    plan.popular ? "bg-sky-500/20 text-sky-400" : "bg-sky-100 text-sky-600"
+                    plan.popular ? "bg-sky-500/20 text-sky-400" : "bg-sky-500/10 text-sky-400"
                   }`}>
                     <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <span className={`text-sm ${plan.popular ? "text-slate-300" : "text-slate-600"}`}>{feature}</span>
+                  <span className={`text-sm ${plan.popular ? "text-slate-300" : "text-slate-300"}`}>{feature}</span>
                 </div>
               ))}
             </div>

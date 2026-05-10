@@ -18,7 +18,7 @@ import { MediaUploader } from "./media-uploader";
 
 const providers: SocialProvider[] = ["meta", "linkedin", "x", "instagram", "tiktok", "pinterest", "youtube", "threads", "bluesky"];
 const inputClassName =
-  "w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-400";
+  "w-full rounded-3xl border border-white/10 glass-light px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/20";
 
 type DraftFormState = {
   title: string;
@@ -287,8 +287,8 @@ export function ComposerPage() {
       <Card>
         <div className="flex items-center justify-between gap-3">
           <div>
-            <CardTitle>Post Composer</CardTitle>
-            <p className="mt-2 text-sm text-slate-600">
+            <CardTitle className="text-white">Post Composer</CardTitle>
+            <p className="mt-2 text-sm text-slate-300">
               Workspace-scoped drafts, media metadata, approval routing, and publish-ready variants.
             </p>
           </div>
@@ -315,11 +315,11 @@ export function ComposerPage() {
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-[220px_1fr]">
-          <div className="space-y-3 rounded-[28px] border border-slate-200 bg-slate-50 p-4">
+          <div className="space-y-3 rounded-[28px] border border-white/10 glass-light p-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-slate-800">Draft Queue</p>
+              <p className="text-sm font-semibold text-white">Draft Queue</p>
               <button
-                className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700"
+                className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-400 hover:text-sky-300"
                 onClick={() => {
                   setSelectedDraftId(null);
                   setForm(emptyForm());
@@ -335,8 +335,8 @@ export function ComposerPage() {
                 className={cn(
                   "w-full rounded-2xl border px-3 py-3 text-left transition",
                   selectedDraftId === draft.draftId
-                    ? "border-slate-950 bg-slate-950 text-white"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                    ? "glass border-sky-500/30 text-sky-400 shadow-[0_0_15px_rgba(14,165,233,0.2)]"
+                    : "glass-light border-white/10 text-slate-300 hover:border-white/20 hover:text-white"
                 )}
                 key={draft.draftId}
                 onClick={() => setSelectedDraftId(draft.draftId)}
@@ -353,7 +353,7 @@ export function ComposerPage() {
           <div className="space-y-5">
             {selectedDraft && (
               <button
-                className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600"
+                className="rounded-full border border-white/10 glass-light px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300 hover:text-white"
                 onClick={hydrateFromServer}
                 type="button"
               >
@@ -361,19 +361,19 @@ export function ComposerPage() {
               </button>
             )}
             {feedback && (
-              <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+              <div className="rounded-2xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-300">
                 {feedback}
               </div>
             )}
-            <div className="flex space-x-2 border-b border-slate-200 pb-px">
+            <div className="flex space-x-2 border-b border-white/10 pb-px">
               {(["content", "media", "platforms", "advanced"] as const).map((tab) => (
                 <button
                   key={tab}
                   className={cn(
                     "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
                     activeTab === tab
-                      ? "border-sky-500 text-sky-600"
-                      : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                      ? "border-sky-500 text-sky-400"
+                      : "border-transparent text-slate-400 hover:text-slate-200 hover:border-white/20"
                   )}
                   onClick={() => setActiveTab(tab)}
                   type="button"
@@ -405,7 +405,7 @@ export function ComposerPage() {
                 </div>
                 <Field label="Body">
                   <textarea
-                    className="min-h-32 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-400"
+                    className="min-h-32 w-full rounded-3xl border border-white/10 glass-light px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/20"
                     onChange={(event) => setForm((current) => ({ ...current, body: event.target.value }))}
                     value={form.body}
                   />
@@ -434,24 +434,24 @@ export function ComposerPage() {
                 />
                 
                 {form.mediaObjectKey && (
-                  <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-4 mt-6">
-                    <p className="text-sm font-semibold text-slate-800 mb-4">Attached Asset Metadata</p>
+                  <div className="rounded-[28px] border border-white/10 glass-light p-4 mt-6">
+                    <p className="text-sm font-semibold text-white mb-4">Attached Asset Metadata</p>
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
                       <div className="text-xs">
-                        <span className="block text-slate-500">Kind</span>
-                        <span className="font-medium text-slate-900">{form.mediaKind}</span>
+                        <span className="block text-slate-400">Kind</span>
+                        <span className="font-medium text-white">{form.mediaKind}</span>
                       </div>
                       <div className="text-xs">
-                        <span className="block text-slate-500">MIME Type</span>
-                        <span className="font-medium text-slate-900">{form.mediaMimeType}</span>
+                        <span className="block text-slate-400">MIME Type</span>
+                        <span className="font-medium text-white">{form.mediaMimeType}</span>
                       </div>
                       <div className="text-xs">
-                        <span className="block text-slate-500">Size</span>
-                        <span className="font-medium text-slate-900">{form.mediaSizeBytes} bytes</span>
+                        <span className="block text-slate-400">Size</span>
+                        <span className="font-medium text-white">{form.mediaSizeBytes} bytes</span>
                       </div>
                       <div className="text-xs">
-                        <span className="block text-slate-500">Bucket</span>
-                        <span className="font-medium text-slate-900">{form.mediaBucket}</span>
+                        <span className="block text-slate-400">Bucket</span>
+                        <span className="font-medium text-white">{form.mediaBucket}</span>
                       </div>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
@@ -481,12 +481,12 @@ export function ComposerPage() {
             {activeTab === "platforms" && (
               <div className="grid gap-4">
                 {providers.map((provider) => (
-                  <div className="rounded-[28px] border border-slate-200 p-4" key={provider}>
+                  <div className="rounded-[28px] border border-white/10 glass-light p-4" key={provider}>
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-600">
+                      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-300">
                         {provider}
                       </p>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-slate-400">
                         {(accountsByProvider[provider] ?? []).length} connected account(s)
                       </span>
                     </div>
@@ -549,8 +549,8 @@ export function ComposerPage() {
                           className={cn(
                             "rounded-full border px-3 py-2 text-xs font-semibold transition",
                             form.variants[provider].targetAccountIds.includes(account.connectedAccountId)
-                              ? "border-slate-950 bg-slate-950 text-white"
-                              : "border-slate-200 bg-slate-50 text-slate-700"
+                              ? "border-sky-500/30 glass shadow-[0_0_15px_rgba(14,165,233,0.2)] text-sky-400"
+                              : "border-white/10 glass-light text-slate-300 hover:text-white hover:border-white/20"
                           )}
                           key={account.connectedAccountId}
                           onClick={() => toggleTarget(provider, account.connectedAccountId)}
@@ -600,7 +600,7 @@ export function ComposerPage() {
                 </div>
                 <Field label="Future AI Metadata">
                   <textarea
-                    className="min-h-28 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-400"
+                    className="min-h-28 w-full rounded-3xl border border-white/10 glass-light px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/20"
                     onChange={(event) => setForm((current) => ({ ...current, metadataJson: event.target.value }))}
                     value={form.metadataJson}
                   />
@@ -636,17 +636,17 @@ export function ComposerPage() {
         </div>
       </Card>
 
-      <Card className="bg-slate-950 text-white">
+      <Card className="glass-dark border-white/10 text-white">
         <CardTitle className="text-white">Preview Stack</CardTitle>
         <p className="mt-3 text-sm leading-7 text-slate-300">
           Live draft preview with platform variants, account targets, and dispatch-ready scheduling context.
         </p>
         <div className="mt-6 grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-[28px] bg-white/10 p-5">
+          <div className="rounded-[28px] glass-light border border-white/10 p-5">
             <p className="text-sm text-slate-300">Character count</p>
             <p className="mt-2 font-display text-4xl">{form.body.length}</p>
           </div>
-          <div className="rounded-[28px] bg-white/10 p-5 text-sm leading-7 text-slate-200">
+          <div className="rounded-[28px] glass-light border border-white/10 p-5 text-sm leading-7 text-slate-200">
             <p className="font-semibold text-white">{form.title}</p>
             <p className="mt-3">{form.body}</p>
             <p className="mt-4 text-slate-300">
@@ -654,7 +654,7 @@ export function ComposerPage() {
             </p>
           </div>
           {providers.map((provider) => (
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-4" key={provider}>
+            <div className="rounded-[28px] border border-white/10 glass-light p-4" key={provider}>
               <div className="flex items-center justify-between">
                 <p className="font-semibold capitalize">{provider}</p>
                 <span className="text-xs uppercase tracking-[0.18em] text-slate-400">
@@ -675,7 +675,7 @@ export function ComposerPage() {
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="grid gap-2">
-      <span className="text-sm font-semibold text-slate-700">{label}</span>
+      <span className="text-sm font-semibold text-slate-300">{label}</span>
       {children}
     </label>
   );

@@ -48,7 +48,7 @@ export function MediaUploader({ onUploadSuccess, onUploadError, uploadMediaCall 
     <div
       className={cn(
         "relative flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed p-10 text-center transition-all",
-        isHovering ? "border-sky-500 bg-sky-50" : "border-slate-200 bg-slate-50 hover:bg-slate-100",
+        isHovering ? "border-sky-500/50 bg-sky-500/10" : "border-white/10 glass-light hover:bg-white/10",
         isUploading && "pointer-events-none opacity-50"
       )}
       onClick={() => fileInputRef.current?.click()}
@@ -66,22 +66,22 @@ export function MediaUploader({ onUploadSuccess, onUploadError, uploadMediaCall 
         onChange={(e) => handleFile(e.target.files?.[0])}
         accept="image/*,video/*"
       />
-      <div className="rounded-full bg-white p-4 shadow-sm">
+      <div className="rounded-full glass border border-white/10 p-4 shadow-sm">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={1.5}
           stroke="currentColor"
-          className="h-6 w-6 text-sky-600"
+          className="h-6 w-6 text-sky-400"
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
         </svg>
       </div>
-      <p className="mt-4 text-sm font-semibold text-slate-800">
+      <p className="mt-4 text-sm font-semibold text-white">
         {isUploading ? "Uploading..." : "Click to upload or drag & drop"}
       </p>
-      <p className="mt-1 text-xs text-slate-500">SVG, PNG, JPG, or MP4 (max. 50MB)</p>
+      <p className="mt-1 text-xs text-slate-400">SVG, PNG, JPG, or MP4 (max. 50MB)</p>
     </div>
   );
 }

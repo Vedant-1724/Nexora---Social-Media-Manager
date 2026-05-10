@@ -25,7 +25,7 @@ function AuthPageShell({
 }) {
   return (
     <div className="mx-auto grid min-h-[calc(100vh-7rem)] max-w-7xl gap-6 px-6 pb-12 pt-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
-      <Card className="flex flex-col justify-between bg-slate-950 text-white">
+      <Card className="flex flex-col justify-between glass-dark border-white/10 text-white">
         <div>
           {badge ? <Badge className="border-white/15 bg-white/10 text-white">{badge}</Badge> : null}
           <h1 className="mt-6 font-display text-5xl leading-tight text-white">
@@ -46,14 +46,14 @@ function AuthPageShell({
         </div>
       </Card>
 
-      <Card className="flex flex-col justify-center">
+      <Card className="flex flex-col justify-center glass border-white/10">
         {badge ? <Badge>{badge}</Badge> : null}
-        <CardTitle className="mt-6 text-4xl">{title}</CardTitle>
-        <CardDescription className="mt-3 max-w-xl text-base leading-7">
+        <CardTitle className="mt-6 text-4xl text-white">{title}</CardTitle>
+        <CardDescription className="mt-3 max-w-xl text-base leading-7 text-slate-300">
           {description}
         </CardDescription>
         <div className="mt-8">{children}</div>
-        {footer ? <div className="mt-6 text-sm text-slate-600">{footer}</div> : null}
+        {footer ? <div className="mt-6 text-sm text-slate-400">{footer}</div> : null}
       </Card>
     </div>
   );
@@ -76,9 +76,9 @@ function Field({
 }) {
   return (
     <label className="grid gap-2">
-      <span className="text-sm font-semibold text-slate-700">{label}</span>
+      <span className="text-sm font-semibold text-slate-300">{label}</span>
       <input
-        className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
+        className="rounded-2xl glass-light border border-white/10 px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/20"
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         readOnly={readOnly}
@@ -98,10 +98,10 @@ function Notice({
 }) {
   const toneClass =
     tone === "error"
-      ? "border-rose-200 bg-rose-50 text-rose-700"
+      ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
       : tone === "success"
-        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-        : "border-sky-200 bg-sky-50 text-sky-800";
+        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+        : "border-sky-500/30 bg-sky-500/10 text-sky-300";
 
   return <div className={`rounded-2xl border px-4 py-3 text-sm ${toneClass}`}>{children}</div>;
 }
@@ -144,7 +144,7 @@ export function LoginPage() {
       description="Use your Nexora credentials to access workspace memberships, protected product routes, and invitation workflows."
       footer={
         <>
-          New to Nexora? <Link className="font-semibold text-sky-700" to="/auth/signup">Create an account</Link>
+          New to Nexora? <Link className="font-semibold text-sky-400 hover:text-sky-300" to="/auth/signup">Create an account</Link>
         </>
       }
     >
@@ -164,9 +164,9 @@ export function LoginPage() {
                 onChange={(e) => enablePersistence(e.target.checked)}
                 className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
               />
-              <span className="text-sm text-slate-600">Remember me</span>
+              <span className="text-sm text-slate-300">Remember me</span>
             </label>
-            <Link className="text-sm font-semibold text-sky-700" to="/auth/password/request">
+            <Link className="text-sm font-semibold text-sky-400 hover:text-sky-300" to="/auth/password/request">
               Forgot your password?
             </Link>
           </div>
@@ -227,7 +227,7 @@ export function SignUpPage() {
       description="Provision your first workspace, owner role, and refresh-rotated session in one flow."
       footer={
         <>
-          Already registered? <Link className="font-semibold text-sky-700" to="/auth/login">Sign in</Link>
+          Already registered? <Link className="font-semibold text-sky-400 hover:text-sky-300" to="/auth/login">Sign in</Link>
         </>
       }
     >
@@ -278,7 +278,7 @@ export function RequestPasswordResetPage() {
       badge="Password Recovery"
       title="Reset your password"
       description="Request a one-time password reset challenge for your Nexora account."
-      footer={<Link className="font-semibold text-sky-700" to="/auth/login">Back to sign in</Link>}
+      footer={<Link className="font-semibold text-sky-400 hover:text-sky-300" to="/auth/login">Back to sign in</Link>}
     >
       <form className="grid gap-4" onSubmit={handleSubmit}>
         {message ? <Notice tone="success">{message}</Notice> : null}
@@ -326,7 +326,7 @@ export function ResetPasswordPage() {
       badge="Password Recovery"
       title="Choose a new password"
       description="Complete the password reset challenge and restore access to your workspace."
-      footer={<Link className="font-semibold text-sky-700" to="/auth/login">Return to sign in</Link>}
+      footer={<Link className="font-semibold text-sky-400 hover:text-sky-300" to="/auth/login">Return to sign in</Link>}
     >
       <form className="grid gap-4" onSubmit={handleSubmit}>
         {message ? <Notice tone="success">{message}</Notice> : null}
@@ -376,7 +376,7 @@ export function VerifyEmailPage() {
       badge="Email Verification"
       title="Confirm your identity"
       description="This challenge activates your Nexora account and unlocks verified workspace ownership."
-      footer={<Link className="font-semibold text-sky-700" to="/auth/login">Return to sign in</Link>}
+      footer={<Link className="font-semibold text-sky-400 hover:text-sky-300" to="/auth/login">Return to sign in</Link>}
     >
       <div className="grid gap-4">
         {message ? (
@@ -387,8 +387,8 @@ export function VerifyEmailPage() {
         {!token ? (
           <Notice tone="error">The verification token is missing from this link.</Notice>
         ) : null}
-        <div className="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-600">
-          Token: <span className="font-semibold text-slate-950">{token || "Missing token"}</span>
+        <div className="rounded-3xl glass-light border border-white/10 px-5 py-4 text-sm text-slate-300">
+          Token: <span className="font-semibold text-white">{token || "Missing token"}</span>
         </div>
       </div>
     </AuthPageShell>
@@ -437,7 +437,7 @@ export function AcceptInvitePage() {
       footer={
         !isAuthenticated ? (
           <>
-            Sign in first: <Link className="font-semibold text-sky-700" to={`/auth/login?next=${encodeURIComponent(`/auth/invite/accept?token=${inviteToken}`)}`}>Continue to sign in</Link>
+            Sign in first: <Link className="font-semibold text-sky-400 hover:text-sky-300" to={`/auth/login?next=${encodeURIComponent(`/auth/invite/accept?token=${inviteToken}`)}`}>Continue to sign in</Link>
           </>
         ) : null
       }

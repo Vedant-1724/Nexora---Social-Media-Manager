@@ -35,8 +35,8 @@ export function TeamPage() {
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-display text-2xl text-slate-950">Team</h2>
-          <p className="mt-1 text-sm text-slate-500">Manage members, roles, and permissions for your workspace.</p>
+          <h2 className="font-display text-2xl text-white">Team</h2>
+          <p className="mt-1 text-sm text-slate-300">Manage members, roles, and permissions for your workspace.</p>
         </div>
         <Button
           onClick={() => setShowInvite(!showInvite)}
@@ -49,19 +49,19 @@ export function TeamPage() {
 
       {/* ── Invite Panel ────────────────────────────────────────── */}
       {showInvite && (
-        <Card className="animate-fade-in-down glow-border border-sky-200/50">
-          <CardTitle className="text-lg mb-4">Invite a New Member</CardTitle>
+        <Card className="animate-fade-in-down glass border border-sky-500/30">
+          <CardTitle className="text-lg mb-4 text-white">Invite a New Member</CardTitle>
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
-              className="flex-1 rounded-2xl border border-slate-200/60 bg-white/60 px-4 py-3 text-sm backdrop-blur transition-all focus:border-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+              className="flex-1 rounded-2xl border border-white/10 glass-light px-4 py-3 text-sm text-white backdrop-blur transition-all focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20 placeholder:text-slate-500"
               placeholder="email@example.com"
               type="email"
             />
-            <select className="rounded-2xl border border-slate-200/60 bg-white/60 px-4 py-3 text-sm backdrop-blur transition-all focus:border-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500/20">
-              <option>Content Editor</option>
-              <option>Analyst</option>
-              <option>Approver</option>
-              <option>Viewer</option>
+            <select className="rounded-2xl border border-white/10 glass-light px-4 py-3 text-sm text-white backdrop-blur transition-all focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20">
+              <option className="bg-slate-900">Content Editor</option>
+              <option className="bg-slate-900">Analyst</option>
+              <option className="bg-slate-900">Approver</option>
+              <option className="bg-slate-900">Viewer</option>
             </select>
             <Button className="shadow-lg shadow-sky-600/20">
               <Mail className="mr-2 h-4 w-4" />
@@ -75,17 +75,17 @@ export function TeamPage() {
         {/* ── Member Cards ──────────────────────────────────────── */}
         <div className="space-y-3 stagger">
           {teamMembers.map((member) => (
-            <Card key={member.email} className="group hover-lift glow-border !p-4">
+            <Card key={member.email} className="group hover-lift !p-4 glass border-white/10">
               <div className="flex items-center gap-4">
                 <div className={cn(
-                  "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-sm font-bold text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3",
+                  "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-sm font-bold text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 border border-white/10",
                   member.gradient
                 )}>
                   {member.avatar}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-slate-900">{member.name}</p>
+                    <p className="text-sm font-semibold text-white">{member.name}</p>
                     {member.status === "active" ? (
                       <div className="flex items-center gap-1">
                         <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(34,197,94,0.5)]" />
@@ -102,13 +102,13 @@ export function TeamPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right hidden sm:block">
-                    <span className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                    <span className="inline-flex items-center gap-1 rounded-lg glass-light border border-white/10 px-2.5 py-1 text-xs font-semibold text-slate-300">
                       <Shield className="h-3 w-3" />
                       {member.role}
                     </span>
                     <p className="mt-1 text-[10px] text-slate-400">{member.joinedAt}</p>
                   </div>
-                  <button className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600">
+                  <button className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-white/10 hover:text-white">
                     <MoreHorizontal className="h-4 w-4" />
                   </button>
                 </div>
@@ -120,18 +120,18 @@ export function TeamPage() {
         {/* ── Sidebar ───────────────────────────────────────────── */}
         <div className="space-y-4">
           {/* Role Definitions */}
-          <Card className="hover-lift">
-            <CardTitle className="text-lg mb-4">Roles & Permissions</CardTitle>
+          <Card className="hover-lift glass border-white/10">
+            <CardTitle className="text-lg mb-4 text-white">Roles & Permissions</CardTitle>
             <div className="space-y-4">
               {Object.entries(roleDescriptions).map(([role, info]) => (
-                <div key={role} className="rounded-2xl border border-slate-100 p-3.5 transition-colors hover:border-sky-200/60 hover:bg-sky-50/20">
+                <div key={role} className="rounded-2xl border border-white/10 p-3.5 transition-colors hover:border-sky-500/30 hover:bg-white/5">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-slate-800">{role}</p>
+                    <p className="text-sm font-semibold text-white">{role}</p>
                     <span className="text-[10px] text-slate-400">{info.description}</span>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {info.permissions.map((perm) => (
-                      <span key={perm} className="inline-flex items-center gap-1 rounded-lg bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+                      <span key={perm} className="inline-flex items-center gap-1 rounded-lg glass-light border border-white/10 px-2 py-0.5 text-[10px] font-medium text-slate-300">
                         <CheckCircle2 className="h-2.5 w-2.5 text-emerald-500" />
                         {perm}
                       </span>
@@ -143,15 +143,15 @@ export function TeamPage() {
           </Card>
 
           {/* Recent Activity */}
-          <Card className="hover-lift">
-            <CardTitle className="text-lg mb-4">Recent Activity</CardTitle>
+          <Card className="hover-lift glass border-white/10">
+            <CardTitle className="text-lg mb-4 text-white">Recent Activity</CardTitle>
             <div className="space-y-3 stagger">
               {recentActivity.map((item) => (
                 <div key={`${item.user}-${item.time}`} className="flex items-start gap-3">
                   <div className="mt-0.5 h-2 w-2 rounded-full bg-sky-400 shadow-[0_0_4px_rgba(14,165,233,0.4)]" />
                   <div>
-                    <p className="text-sm text-slate-700">
-                      <span className="font-semibold text-slate-900">{item.user}</span>{" "}
+                    <p className="text-sm text-slate-300">
+                      <span className="font-semibold text-white">{item.user}</span>{" "}
                       {item.action}
                     </p>
                     <p className="mt-0.5 text-xs text-slate-400">{item.time}</p>
